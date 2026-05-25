@@ -37,6 +37,7 @@ The project is built for the Chrome extension runtime, not as a standalone websi
 - Chrome bookmark import, export, and sync support
 - Card and list views with filtering, sorting, and batch actions
 - Local storage workflow with React, Zustand, and TypeScript
+<img width="1097" height="913" alt="image" src="https://github.com/user-attachments/assets/ab0620ed-942c-4458-b725-1baa38231803" />
 
 ## Feature Set
 
@@ -45,6 +46,7 @@ The project is built for the Chrome extension runtime, not as a standalone websi
 - Save the active tab from the popup
 - Keep the popup fast by handing AI work to the background
 - Store notes, ratings, favicon data, and preview screenshots
+<img width="482" height="602" alt="image" src="https://github.com/user-attachments/assets/30d4d0e4-8227-451f-8f12-cf08bf5024ca" />
 
 ### AI Enrichment
 
