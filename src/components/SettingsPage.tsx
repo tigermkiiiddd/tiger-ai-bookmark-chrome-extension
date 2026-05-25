@@ -9,6 +9,8 @@ import {
   formatLinkCheckSkipPeriod
 } from '../utils/linkCheck';
 import ChromeSyncSettings from './ChromeSyncSettings';
+import { t } from '../i18n';
+import { APP_INFO } from '../constants';
 
 const SettingsPage: React.FC = () => {
   usePageState();
@@ -39,7 +41,7 @@ const SettingsPage: React.FC = () => {
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error('保存设置失败:', error);
-      alert('保存设置失败，请重试');
+      alert(t('settingsSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -59,7 +61,7 @@ const SettingsPage: React.FC = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('导出失败:', error);
-      alert('导出失败，请重试');
+      alert(t('settingsExportFailed'));
     }
   };
 
@@ -69,11 +71,11 @@ const SettingsPage: React.FC = () => {
     try {
       const text = await importFile.text();
       await importData(text);
-      alert('导入成功！');
+      alert(t('settingsImportSuccess'));
       setImportFile(null);
     } catch (error) {
       console.error('导入失败:', error);
-      alert('导入失败，请检查文件格式');
+      alert(t('settingsImportFailed'));
     }
   };
 
@@ -92,7 +94,7 @@ const SettingsPage: React.FC = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('创建检查点失败:', error);
-      alert('创建检查点失败，请重试');
+      alert(t('settingsCreateCheckpointFailed'));
     } finally {
       setIsCreatingCheckpoint(false);
     }
@@ -100,17 +102,17 @@ const SettingsPage: React.FC = () => {
 
   const handleRestoreCheckpoint = async () => {
     if (!checkpointFile) return;
-    if (!confirm('恢复检查点将覆盖所有当前数据（书签、标签、分类、设置、回收站等），确定继续吗？')) return;
+    if (!confirm(t('settingsRestoreCheckpointConfirm'))) return;
 
     setIsRestoringCheckpoint(true);
     try {
       const text = await checkpointFile.text();
       await restoreCheckpoint(text);
-      alert('检查点恢复成功！');
+      alert(t('settingsRestoreCheckpointSuccess'));
       setCheckpointFile(null);
     } catch (error) {
       console.error('恢复检查点失败:', error);
-      alert('恢复检查点失败，请检查文件格式');
+      alert(t('settingsRestoreCheckpointFailed'));
     } finally {
       setIsRestoringCheckpoint(false);
     }
@@ -122,47 +124,42 @@ const SettingsPage: React.FC = () => {
 
   const handleResetAllArchive = async () => {
     if (archivedCount === 0) {
-      alert('当前没有需要重置的已归档书签。');
+      alert(t('settingsNoArchivedBookmarks'));
       return;
     }
 
     const confirmed = confirm(
-      `将把 ${archivedCount} 个已归档书签恢复为「正常」状态。\n\n` +
-        '不会删除标签、分类和 AI 分析内容。\n\n确定继续吗？'
+      t('settingsResetArchiveConfirm1', String(archivedCount))
     );
     if (!confirmed) return;
 
-    const doubleConfirmed = confirm(
-      `再次确认：重置 ${archivedCount} 个书签的归档状态？`
-    );
+    const doubleConfirmed = confirm(t('settingsResetArchiveConfirm2', String(archivedCount)));
     if (!doubleConfirmed) return;
 
     setIsResettingArchive(true);
     try {
       const count = await resetAllArchiveStatus();
-      alert(`已重置 ${count} 个书签的归档状态。`);
+      alert(t('settingsResetArchiveDone', String(count)));
     } catch (error) {
       console.error('重置归档失败:', error);
-      alert('重置失败，请重试。');
+      alert(t('settingsResetArchiveFailed'));
     } finally {
       setIsResettingArchive(false);
     }
   };
 
   const handleClearAll = async () => {
-    const confirmed = confirm(
-      '警告：此操作将删除所有书签、标签、分类和设置数据，且无法恢复。\n\n确定要继续吗？'
-    );
+    const confirmed = confirm(t('settingsClearAllConfirm1'));
     
     if (confirmed) {
-      const doubleConfirmed = confirm('再次确认：真的要删除所有数据吗？');
+      const doubleConfirmed = confirm(t('settingsClearAllConfirm2'));
       if (doubleConfirmed) {
         try {
           await clearAllData();
-          alert('所有数据已清空');
+          alert(t('settingsClearAllDone'));
         } catch (error) {
           console.error('清空数据失败:', error);
-          alert('清空数据失败，请重试');
+          alert(t('settingsClearAllFailed'));
         }
       }
     }
@@ -181,11 +178,11 @@ const SettingsPage: React.FC = () => {
           className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
-          返回所有书签
+          {t('settingsBackToAllBookmarks')}
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">设置</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('settingsTitle')}</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          配置 TIGERMARKIII 的各项功能和偏好设置
+          {t('settingsDescription')}
         </p>
       </div>
 
@@ -194,7 +191,7 @@ const SettingsPage: React.FC = () => {
         <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Brain className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">AI 功能</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('settingsAiFeatures')}</h2>
           </div>
 
           <div className="space-y-6">
@@ -202,13 +199,13 @@ const SettingsPage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Key className="w-4 h-4 inline mr-2" />
-                AI API 密钥
+                {t('settingsAiApiKey')}
               </label>
               <input
                 type="password"
                 value={formData.aiApiKey || ''}
                 onChange={(e) => handleInputChange('aiApiKey', e.target.value)}
-                placeholder="输入你的 API 密钥..."
+                placeholder={t('settingsAiApiKeyPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
@@ -216,7 +213,7 @@ const SettingsPage: React.FC = () => {
             {/* API Base URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                API Base URL
+                {t('settingsApiBaseUrl')}
               </label>
               <input
                 type="text"
@@ -226,20 +223,20 @@ const SettingsPage: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
               />
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                支持 OpenAI、Ollama、LM Studio 等兼容端点
+                {t('settingsApiBaseUrlHint')}
               </p>
             </div>
 
             {/* Model */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                模型名称
+                {t('settingsModelName')}
               </label>
               <input
                 type="text"
                 value={formData.aiModel || ''}
                 onChange={(e) => handleInputChange('aiModel', e.target.value)}
-                placeholder="gpt-4o-mini"
+                placeholder={t('settingsModelNamePlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
@@ -247,9 +244,9 @@ const SettingsPage: React.FC = () => {
             {/* Auto Tagging */}
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900 dark:text-white">AI 自动标签</h3>
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">{t('settingsAiAutoTagging')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  为新添加的书签自动生成智能标签
+                  {t('settingsAiAutoTaggingDescription')}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -270,27 +267,27 @@ const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-3 mb-6">
             <Link2 className="w-6 h-6 text-primary" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              链接检测
+              {t('settingsLinkCheck')}
             </h2>
           </div>
 
           <div className="space-y-6">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              上次全量检测：{formatLastLinkCheckTime(formData.lastLinkCheckAt)}
+              {t('settingsLastFullCheck', formatLastLinkCheckTime(formData.lastLinkCheckAt))}
             </p>
 
             <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-4 space-y-4">
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                以下为可选项。默认每次检测全部待检书签；仅在开启跳过时，才按时间窗口过滤。
+                {t('settingsLinkCheckOptionalHint')}
               </p>
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                    跳过近期已检测（可选）
+                    {t('settingsSkipRecentChecks')}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    关闭 = 不跳过，每次都检测全部书签
+                    {t('settingsSkipRecentChecksDescription')}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -309,7 +306,7 @@ const SettingsPage: React.FC = () => {
               {formData.linkCheckSkipRecently ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    跳过时间窗口
+                    {t('settingsLinkCheckWindow')}
                   </label>
                   <select
                     value={
@@ -323,27 +320,27 @@ const SettingsPage: React.FC = () => {
                     }
                     className="w-full max-w-xs px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
                   >
-                    <option value="1m">1 个月内已检测的不重复检测</option>
-                    <option value="6m">6 个月内已检测的不重复检测</option>
-                    <option value="1y">1 年内已检测的不重复检测</option>
+                    <option value="1m">{t('settingsLinkCheckSkip1m')}</option>
+                    <option value="6m">{t('settingsLinkCheckSkip6m')}</option>
+                    <option value="1y">{t('settingsLinkCheckSkip1y')}</option>
                   </select>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {formatLinkCheckSkipPeriod(formData)}内检测过的书签将跳过
+                    {t('settingsLinkCheckCheckedWithin', formatLinkCheckSkipPeriod(formData))}
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  当前未启用跳过，检测时会包含所有未归档书签。
+                  {t('settingsLinkCheckNoSkip')}
                 </p>
               )}
             </div>
 
             <div className="rounded-lg border border-dashed border-amber-300/60 dark:border-amber-700/60 p-4 space-y-3">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                AI 归档前链接检测
+                {t('settingsAiArchiveLinkCheck')}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                扩展内 fetch 无法像浏览器一样打开页面，带防爬的网站常被误判失效。批量归档默认不依赖此检测。
+                {t('settingsAiArchiveLinkCheckHint')}
               </p>
               <select
                 value={formData.aiArchiveLinkCheckMode ?? 'off'}
@@ -355,9 +352,9 @@ const SettingsPage: React.FC = () => {
                 }
                 className="w-full max-w-md px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
               >
-                <option value="off">关闭（推荐）— 不检测，直接 AI 归档</option>
-                <option value="lenient">仅记录 — 检测但不阻断、不把结果标为失效</option>
-                <option value="strict">严格 — 仅 404/410 等明确页面不存在才跳过</option>
+                <option value="off">{t('settingsAiArchiveModeOff')}</option>
+                <option value="lenient">{t('settingsAiArchiveModeLenient')}</option>
+                <option value="strict">{t('settingsAiArchiveModeStrict')}</option>
               </select>
             </div>
           </div>
@@ -370,17 +367,17 @@ const SettingsPage: React.FC = () => {
         <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Palette className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">外观</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('settingsAppearance')}</h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">主题模式</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('settingsThemeMode')}</h3>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { value: 'light', label: '浅色', icon: '☀️' },
-                  { value: 'dark', label: '深色', icon: '🌙' },
-                  { value: 'system', label: '跟随系统', icon: '💻' }
+                  { value: 'light', label: t('settingsThemeLight'), icon: '☀️' },
+                  { value: 'dark', label: t('settingsThemeDark'), icon: '🌙' },
+                  { value: 'system', label: t('settingsThemeSystem'), icon: '💻' }
                 ].map(theme => (
                   <label
                     key={theme.value}
@@ -413,30 +410,30 @@ const SettingsPage: React.FC = () => {
         <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-3 mb-6">
             <Download className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">数据管理</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('settingsDataManagement')}</h2>
           </div>
 
           <div className="space-y-6">
             {/* Export Data */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">导出数据</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settingsExportDataTitle')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                导出所有书签、标签、分类和设置到 JSON 文件
+                {t('settingsExportDataDescription')}
               </p>
               <button
                 onClick={handleExport}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md transition-colors"
               >
                 <Download className="w-4 h-4" />
-                导出数据
+                {t('settingsExportDataButton')}
               </button>
             </div>
 
             {/* Import Data */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">导入数据</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settingsImportDataTitle')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                从备份文件恢复数据（将覆盖现有数据）
+                {t('settingsImportDataDescription')}
               </p>
               <div className="flex items-center gap-3">
                 <input
@@ -451,7 +448,7 @@ const SettingsPage: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-md transition-colors"
                   >
                     <Upload className="w-4 h-4" />
-                    导入
+                    {t('settingsImportDataButton')}
                   </button>
                 )}
               </div>
@@ -461,10 +458,10 @@ const SettingsPage: React.FC = () => {
             <div className="pt-4 border-t border-blue-200 dark:border-blue-800">
               <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                 <Database className="w-4 h-4" />
-                数据库检查点
+                {t('settingsCheckpointTitle')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                完整数据库快照，包含书签、标签、分类、设置、回收站、AI 检查点等所有数据
+                {t('settingsCheckpointDescription')}
               </p>
               <div className="space-y-3">
                 <button
@@ -473,12 +470,12 @@ const SettingsPage: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-md transition-colors"
                 >
                   <Download className="w-4 h-4" />
-                  {isCreatingCheckpoint ? '创建中...' : '创建并下载检查点'}
+                  {isCreatingCheckpoint ? t('settingsCreatingCheckpoint') : t('settingsCreateCheckpoint')}
                 </button>
 
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    从检查点文件恢复所有数据
+                    {t('settingsRestoreCheckpointHint')}
                   </p>
                   <div className="flex items-center gap-3">
                     <input
@@ -494,7 +491,7 @@ const SettingsPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-md transition-colors"
                       >
                         <Upload className="w-4 h-4" />
-                        {isRestoringCheckpoint ? '恢复中...' : '恢复检查点'}
+                        {isRestoringCheckpoint ? t('settingsRestoringCheckpoint') : t('settingsRestoreCheckpoint')}
                       </button>
                     )}
                   </div>
@@ -506,13 +503,13 @@ const SettingsPage: React.FC = () => {
             <div className="pt-4 border-t border-amber-200 dark:border-amber-800">
               <h3 className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
                 <ArchiveRestore className="w-4 h-4" />
-                临时工具：重置归档状态
+                {t('settingsResetArchiveTitle')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                将所有已归档书签批量恢复为「正常」状态，保留标签、分类和 AI 分析结果。
+                {t('settingsResetArchiveDescription')}
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-400 mb-3">
-                当前待重置：{archivedCount} 个书签
+                {t('settingsResetArchivePending', String(archivedCount))}
               </p>
               <button
                 type="button"
@@ -521,23 +518,39 @@ const SettingsPage: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors"
               >
                 <ArchiveRestore className="w-4 h-4" />
-                {isResettingArchive ? '重置中...' : '重置全部归档为未归档'}
+                {isResettingArchive ? t('settingsResetArchiveRunning') : t('settingsResetArchiveButton')}
               </button>
             </div>
 
             {/* Clear All Data */}
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">危险操作</h3>
+              <h3 className="text-sm font-medium text-red-700 dark:text-red-400 mb-2">{t('settingsDangerZone')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                永久删除所有数据，包括书签、标签、分类和设置
+                {t('settingsClearAllDescription')}
               </p>
               <button
                 onClick={handleClearAll}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                清空所有数据
+                {t('settingsClearAllButton')}
               </button>
+            </div>
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settingsAboutTitle')}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                {t('settingsAboutDescription')}
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t('settingsVersionLabel', APP_INFO.version)}
+              </p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                {t('settingsLicenseLabel')}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {t('settingsLicenseDescription')}
+              </p>
             </div>
           </div>
         </section>
@@ -550,11 +563,11 @@ const SettingsPage: React.FC = () => {
           {showSuccess ? (
             <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300 min-w-0">
               <CheckCircle className="w-4 h-4 shrink-0 text-green-600 dark:text-green-400" />
-              <span className="font-medium truncate">设置已保存</span>
+              <span className="font-medium truncate">{t('settingsSaveSuccess')}</span>
             </div>
           ) : (
             <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
-              修改后请点击保存
+              {t('settingsClickSaveHint')}
             </span>
           )}
           <button
@@ -567,7 +580,7 @@ const SettingsPage: React.FC = () => {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {isSaving ? '保存中...' : '保存设置'}
+            {isSaving ? t('settingsSavingButton') : t('settingsSaveButton')}
           </button>
         </div>
       </div>

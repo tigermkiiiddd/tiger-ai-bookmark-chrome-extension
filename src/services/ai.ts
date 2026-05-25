@@ -4,6 +4,7 @@
  */
 import type { AIAnalysisResult, Settings, PageAnalysis, CategoryArchiveContext, Tag } from '../types/index.js';
 import { formatCategoryTreeForAI, formatTaxonomyRulesForAI, normalizeCategoryPath } from '../utils/categoryTreeBuilder.js';
+import { tryGetUiLanguage } from '../i18n/index.js';
 
 export interface AIConfig {
   apiKey: string;
@@ -21,6 +22,7 @@ interface TagSuggestion {
 
 type JSONSchema = Record<string, unknown>;
 type StructuredMode = 'tool' | 'json_schema' | 'json_object' | 'prompt';
+type OutputLanguage = string;
 
 interface StructuredOutputConfig {
   name: string;
@@ -30,13 +32,19 @@ interface StructuredOutputConfig {
 
 const DEFAULT_BASE_URL = 'https://api.openai.com';
 const DEFAULT_MODEL = 'gpt-4o-mini';
+const PERSONA_TARGET_LENGTH = 30;
+const CATEGORY_REASON_TARGET_LENGTH = 40;
 
 const AI_ANALYSIS_SCHEMA: JSONSchema = {
   type: 'object',
   additionalProperties: false,
   required: ['simulated_persona', 'tags', 'category', 'categoryDecision', 'categoryReason', 'keywords', 'summary'],
   properties: {
-    simulated_persona: { type: 'string' },
+    simulated_persona: {
+      type: 'string',
+      minLength: 2,
+      description: `用户画像描述，禁止超过 ${PERSONA_TARGET_LENGTH} 字符`,
+    },
     tags: {
       type: 'array',
       minItems: 12,
@@ -52,7 +60,10 @@ const AI_ANALYSIS_SCHEMA: JSONSchema = {
     },
     category: { type: 'string' },
     categoryDecision: { type: 'string', enum: ['reuse', 'extend', 'create'] },
-    categoryReason: { type: 'string' },
+    categoryReason: {
+      type: 'string',
+      description: `分类原因说明，禁止超过 ${CATEGORY_REASON_TARGET_LENGTH} 字符`,
+    },
     keywords: {
       type: 'array',
       minItems: 1,
@@ -92,6 +103,14 @@ export class AIService {
   private analysisCache = new Map<string, Promise<AIAnalysisResult>>();
   /** 记录已确认不支持的 structured output 模式，避免重复无效调用 */
   private unsupportedModes = new Set<StructuredMode>();
+
+  private isChineseLocale(locale?: string): boolean {
+    return typeof locale === 'string' && locale.toLowerCase().startsWith('zh');
+  }
+
+  private isEnglishLocale(locale?: string): boolean {
+    return typeof locale === 'string' && locale.toLowerCase().startsWith('en');
+  }
 
   public static getInstance(): AIService {
     if (!AIService.instance) {
@@ -158,14 +177,22 @@ export class AIService {
   ): Promise<AIAnalysisResult> {
     if (!this.config) throw new Error('AI服务未初始化');
 
-    const cacheKey = `${url}:${content.substring(0, 500)}:${categoryContext?.categories.length ?? 0}`;
+    const outputLanguage = this.resolveOutputLanguage();
+    const cacheKey = `${url}:${outputLanguage}:${content.substring(0, 500)}:${categoryContext?.categories.length ?? 0}`;
     if (this.analysisCache.has(cacheKey)) {
       return this.analysisCache.get(cacheKey)!;
     }
 
     const promise = (async () => {
       try {
-        const prompt = this.buildAnalysisPrompt(content, url, categoryContext, existingTags, tagCounts);
+        const prompt = this.buildAnalysisPrompt(
+          content,
+          url,
+          categoryContext,
+          existingTags,
+          tagCounts,
+          outputLanguage
+        );
         const response = await this.callAPI(prompt.user, {
           systemPrompt: prompt.system,
           temperature: 0.2,
@@ -567,28 +594,96 @@ export class AIService {
     return roots.length > 0 ? render(roots, '') : '（暂无标签）';
   }
 
-  private buildAnalysisPrompt(content: string, url: string, categoryContext?: CategoryArchiveContext, existingTags?: Tag[], tagCounts?: Map<string, number>): { system: string; user: string } {
+  private resolveOutputLanguage(): OutputLanguage {
+    const locale = tryGetUiLanguage()?.trim();
+    return locale || 'en';
+  }
+
+  private buildOutputLanguageInstruction(outputLanguage: OutputLanguage): string {
+    if (this.isChineseLocale(outputLanguage)) {
+      return `# 输出语言要求
+- 所有可读文本字段必须使用简体中文输出
+- 包括 simulated_persona、tags、category、categoryReason、keywords、summary
+- 除专有名词、产品名、URL、代码标识符外，不要输出英文句子
+- 当前 Chrome UI locale: ${outputLanguage}`;
+    }
+
+    if (this.isEnglishLocale(outputLanguage)) {
+      return `# Output Language Requirements
+- Every user-facing text field MUST be written in English
+- This includes simulated_persona, tags, category, categoryReason, keywords, and summary
+- Do not output other languages unless a proper noun, brand name, URL, or code identifier must stay as-is
+- Current Chrome UI locale: ${outputLanguage}`;
+    }
+
+    return `# Output Language Requirements
+- Every user-facing text field MUST be written in the Chrome UI language locale: ${outputLanguage}
+- This includes simulated_persona, tags, category, categoryReason, keywords, and summary
+- Use natural, fluent wording for locale ${outputLanguage}; do not default to English or Simplified Chinese
+- Keep only proper nouns, brand names, URLs, and code identifiers in their original form when necessary`;
+  }
+
+  private buildAnalysisPrompt(
+    content: string,
+    url: string,
+    categoryContext?: CategoryArchiveContext,
+    existingTags?: Tag[],
+    tagCounts?: Map<string, number>,
+    outputLanguage: OutputLanguage = 'zh-CN'
+  ): { system: string; user: string } {
     const urlObj = new URL(url);
     const domain = urlObj.hostname;
     const isHomePage = urlObj.pathname === '/' || urlObj.pathname === '' || urlObj.pathname === '/index.html';
 
+    const isChineseOutput = this.isChineseLocale(outputLanguage);
     const existingTree = categoryContext
       ? formatCategoryTreeForAI(categoryContext.categories, categoryContext.bookmarkCountByCategoryId)
-      : '（未加载分类数据）';
+      : isChineseOutput
+        ? '（未加载分类数据）'
+        : '(no category tree loaded)';
 
     const existingTagTree = existingTags?.length
       ? this.formatTagTreeForAI(existingTags, tagCounts)
-      : '（暂无现有标签）';
+      : isChineseOutput
+        ? '（暂无现有标签）'
+        : '(no existing tags)';
 
     const taxonomyRules = formatTaxonomyRulesForAI();
+    const outputLanguageInstruction = this.buildOutputLanguageInstruction(outputLanguage);
+    const outputFormatIntro =
+      isChineseOutput
+        ? '必须返回严格 JSON，格式如下：'
+        : `Return strict JSON in the following format. Replace every placeholder with natural output in locale ${outputLanguage}:`;
+    const outputExample =
+      isChineseOutput
+        ? `{
+  "simulated_persona": "用户画像描述（禁止超过30字）",
+  "tags": ["视频/B站", "视频/B站/弹幕", "二次元/ACG", "Coser/enako", "动画/新番", "动画/作品/鬼灭之刃", "漫画/日系", "漫画/风格/热血", "声优/花江夏樹", "漫画/奇幻/魔法", "动画/制作/ufotable", "社区/讨论"],
+  "category": "一级/二级/三级/四级",
+  "categoryDecision": "reuse|extend|create",
+  "categoryReason": "说明选择此路径及决策类型（禁止超过40字）",
+  "keywords": ["关键词1", "关键词2"],
+  "summary": "用户视角的摘要，100-200字"
+}`
+        : `{
+  "simulated_persona": "<persona in locale ${outputLanguage}, must not exceed ${PERSONA_TARGET_LENGTH} characters>",
+  "tags": ["<localized/tag/path/1>", "<localized/tag/path/2>"],
+  "category": "<localized/category/path>",
+  "categoryDecision": "reuse|extend|create",
+  "categoryReason": "<reason in locale ${outputLanguage}, must not exceed ${CATEGORY_REASON_TARGET_LENGTH} characters>",
+  "keywords": ["<keyword1 in locale ${outputLanguage}>", "<keyword2 in locale ${outputLanguage}>"],
+  "summary": "<objective summary in locale ${outputLanguage}>"
+}`;
 
-    const system = `# Role
+    const system = `${outputLanguageInstruction}
+
+# Role
 你是一名经验丰富、思想成熟的网站内容策略师与信息架构师。
 
 # Workflow
 1. 全面审查用户提供的网页内容。
 2. 识别核心实体，区分主要实体和次要实体。
-3. 识别网站性格并模拟用户角色。
+3. 识别网站性格并模拟用户角色，输出用户画像；simulated_persona 禁止超过 ${PERSONA_TARGET_LENGTH} 字。
 4. 多维度标签提取：生成 12-22 条**层级标签路径**（每条为 tag tree 上的一条完整路径，见 Tag Rules）。
 5. **分类决策**（参考 Category Taxonomy Rules 与用户消息中的已有分类树）：
    - 先扫描用户消息中的 <existing_category_tree>，判断内容能否归入已有路径
@@ -596,8 +691,9 @@ export class AIService {
    - 路径最多4级，书签应归入最深层级（优先L4，至少L3）
    - **L4 实体例外**：页面核心围绕某位作者、特定人名或特定角色时，第4级直接用其人名/角色名（不要加「漫画家·」「导演·」「角色·」等类型前缀），单条书签也可建 L4；一般技术/主题子题仍遵守「3+ 相似书签再建 L4」
 6. 核心关键词提炼（4-5个）。
-7. 撰写摘要（用户视角，围绕主要实体）：你需要代入目标用户来理解内容，但摘要本身必须是客观描述，禁止出现"作为...""身为..."等角色扮演前缀，禁止第一人称。
-8. 格式化为严格 JSON。
+7. categoryReason 只说明路径选择与决策类型，不要展开成长段解释，禁止超过 ${CATEGORY_REASON_TARGET_LENGTH} 字。
+8. 撰写摘要（用户视角，围绕主要实体）：你需要代入目标用户来理解内容，但摘要本身必须是客观描述，禁止出现"作为...""身为..."等角色扮演前缀，禁止第一人称。
+9. 格式化为严格 JSON。
 
 # Category Taxonomy Rules
 ${taxonomyRules}
@@ -615,16 +711,8 @@ ${taxonomyRules}
 - **近义词合并（最高优先级）**：语义相同或高度相近的概念必须合并到同一条路径，不要拆成多条。合并时保留**更通用、覆盖面更广**的那个词，淘汰窄词。例如"视频/3D动画"和"动画/3D动画"→保留"动画/3D动画"（动画是更通用的上位概念）；"编程/AI"和"技术/人工智能"→保留"编程/AI"（AI 更通用简短）。先扫描 <existing_tag_tree> 中是否已有语义等价的路径，有则直接复用，不要新建变体。标签数量有限（12-22条），每条都应覆盖一个独立维度，近义词拆开 = 浪费名额
 
 # Output Format
-必须返回严格 JSON，格式如下：
-{
-  "simulated_persona": "用户画像描述",
-  "tags": ["视频/B站", "视频/B站/弹幕", "二次元/ACG", "Coser/enako", "动画/新番", "动画/作品/鬼灭之刃", "漫画/日系", "漫画/风格/热血", "声优/花江夏樹", "漫画/奇幻/魔法", "动画/制作/ufotable", "社区/讨论"],
-  "category": "一级/二级/三级/四级",
-  "categoryDecision": "reuse|extend|create",
-  "categoryReason": "简述为何选择此路径及决策类型",
-  "keywords": ["关键词1", "关键词2"],
-  "summary": "用户视角的摘要，100-200字"
-}`;
+${outputFormatIntro}
+${outputExample}`;
 
     const user = `# Existing Category Tree
 <existing_category_tree>
@@ -652,6 +740,7 @@ ${content.substring(0, 8000)}
   }
 
   private buildTagSuggestionPrompt(tags: Tag[], tagCounts: Map<string, number>): { system: string; user: string } {
+    const outputLanguage = this.resolveOutputLanguage();
     const tagMap = new Map(tags.map(t => [t.id, t]));
 
     function buildPath(tagId: string): string[] {
@@ -675,16 +764,27 @@ ${content.substring(0, 8000)}
       })
       .join('\n');
 
-    const system = `你是专业数据分析师。请分析用户提供的标签层级结构及使用频率，识别可合并的相似/同义标签、可提升层级的扁平标签、以及冗余标签，返回严格 JSON 数组格式。
+    const system = this.isChineseLocale(outputLanguage)
+      ? `你是专业数据分析师。请分析用户提供的标签层级结构及使用频率，识别可合并的相似/同义标签、可提升层级的扁平标签、以及冗余标签，返回严格 JSON 数组格式。
 
 # 分析原则
 - 标签层级应从独立维度展开（内容类型、技术主题、技术栈、难度等），不要和分类维度重叠
 - **优先建议扁平标签归入层级**。大量使用频率高但没有父级的扁平标签是最大问题，应优先建议为其建立层级归属（如 "魔法" → "漫画/魔法"，"TypeScript" → "编程/TypeScript"）
 - 同维度下的叶子节点若语义相近，可建议合并
 - 孤立的热门标签可考虑建议为其建立层级归属
-- 父子标签如果经常同时出现在同一书签上，可能层级设计有问题`;
+- 父子标签如果经常同时出现在同一书签上，可能层级设计有问题`
+      : `You are a data analyst. Review the tag hierarchy and usage frequency, identify duplicate or redundant tags, flat tags that should be moved into a hierarchy, and return a strict JSON array.
 
-    const user = `标签层级列表:
+# Rules
+- Keep hierarchy dimensions independent (content type, topic, tech stack, difficulty, etc.) and avoid duplicating category semantics
+- Prioritize moving flat high-frequency tags into hierarchical paths
+- Merge semantically similar leaf nodes under the same dimension
+- Popular isolated tags should usually be assigned a parent path
+- If parent and child tags often appear together on the same bookmark, the hierarchy may need cleanup
+- Write every reason, sourceTag, targetTag, and newName in the Chrome UI language locale ${outputLanguage}, unless a proper noun must stay as-is`;
+
+    const user = this.isChineseLocale(outputLanguage)
+      ? `标签层级列表:
 ${tagLines}
 
 请以JSON数组格式返回清理建议：
@@ -692,6 +792,15 @@ ${tagLines}
   { "action": "merge", "sourceTag": "原始标签路径", "targetTag": "目标标签路径", "newName": null, "reason": "原因" },
   { "action": "rename", "sourceTag": "原始标签路径", "targetTag": null, "newName": "新标签路径", "reason": "原因" },
   { "action": "delete", "sourceTag": "冗余标签路径", "targetTag": null, "newName": null, "reason": "原因" }
+]`
+      : `Tag hierarchy list:
+${tagLines}
+
+Return cleanup suggestions as a JSON array:
+[
+  { "action": "merge", "sourceTag": "<source tag path in locale ${outputLanguage}>", "targetTag": "<target tag path in locale ${outputLanguage}>", "newName": null, "reason": "<reason in locale ${outputLanguage}>" },
+  { "action": "rename", "sourceTag": "<source tag path in locale ${outputLanguage}>", "targetTag": null, "newName": "<new tag path in locale ${outputLanguage}>", "reason": "<reason in locale ${outputLanguage}>" },
+  { "action": "delete", "sourceTag": "<redundant tag path in locale ${outputLanguage}>", "targetTag": null, "newName": null, "reason": "<reason in locale ${outputLanguage}>" }
 ]`;
 
     return { system, user };
@@ -777,7 +886,10 @@ ${tagLines}
       }
 
       const final: AIAnalysisResult = {
-        simulated_persona: typeof result.simulated_persona === 'string' ? result.simulated_persona : '未知用户',
+        simulated_persona:
+          typeof result.simulated_persona === 'string' && result.simulated_persona.trim()
+            ? result.simulated_persona.trim()
+            : '未知用户',
         tags: normalizedTags,
         category: normalizedCategory,
         categoryDecision: decision,

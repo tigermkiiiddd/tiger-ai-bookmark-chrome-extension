@@ -19,6 +19,7 @@ import {
 import { validateDraftBookmark } from './utils/validateDraftBookmark';
 import { captureTabScreenshot } from './utils/captureTabScreenshot';
 import { PAGE_CAPTURE_PREVIEW_PATCH } from '@/utils/bookmarkThumbnail';
+import { t } from '@/i18n';
 
 const PopupApp: React.FC = () => {
   const { state, dispatch } = usePopupState();
@@ -127,7 +128,7 @@ const PopupApp: React.FC = () => {
     if (!draft?.url) return;
 
     if (!settings.aiApiKey?.trim()) {
-      dispatch({ type: 'SET_ANALYSIS_ERROR', payload: '请先在设置中配置 AI API 密钥' });
+      dispatch({ type: 'SET_ANALYSIS_ERROR', payload: t('popupConfigureAiKeyFirst') });
       return;
     }
 
@@ -137,12 +138,12 @@ const PopupApp: React.FC = () => {
     try {
       const content = buildAnalysisContent(draft);
       if (!content) {
-        throw new Error('无法提取页面内容，请填写标题或描述后重试');
+        throw new Error(t('popupUnableExtractContent'));
       }
       const analysis = await analyzeWithAI(draft.url, content);
       await applyAnalysisToDraft(analysis);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'AI分析失败';
+      const message = error instanceof Error ? error.message : t('popupAnalysisFailed');
       dispatch({ type: 'SET_ANALYSIS_ERROR', payload: message });
       console.error('Analysis failed:', error);
     } finally {
@@ -264,7 +265,7 @@ const PopupApp: React.FC = () => {
           },
         });
         if (!response?.success) {
-          throw new Error(response?.error || '后台 AI 任务入队失败');
+          throw new Error(response?.error || t('popupAiQueueFailed'));
         }
       };
 
@@ -286,7 +287,7 @@ const PopupApp: React.FC = () => {
         dispatch({ type: 'SET_IS_UPDATE_MODE', payload: true });
         dispatch({
           type: 'SET_ANALYSIS_ERROR',
-          payload: '书签已保存，但后台 AI 任务创建失败，请稍后重试 AI 智能分析',
+          payload: t('popupBookmarkSavedAiQueueFailed'),
         });
         return;
       }
@@ -342,7 +343,7 @@ const PopupApp: React.FC = () => {
       if (!tab?.id) {
         dispatch({
           type: 'SET_SCREENSHOT_ERROR',
-          payload: '无法获取当前标签页，请在本页打开要收藏的网站后再试',
+          payload: t('popupRefreshScreenshotNoTab'),
         });
         return;
       }
@@ -352,7 +353,7 @@ const PopupApp: React.FC = () => {
         dispatch({
           type: 'SET_SCREENSHOT_ERROR',
           payload:
-            '截图失败：请等页面加载完成后再试，且不要使用 chrome:// 等浏览器内置页',
+            t('popupRefreshScreenshotFailed'),
         });
         return;
       }
@@ -374,7 +375,7 @@ const PopupApp: React.FC = () => {
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : '截图失败，请稍后重试';
+        error instanceof Error ? error.message : t('popupRefreshScreenshotFailed');
       dispatch({ type: 'SET_SCREENSHOT_ERROR', payload: message });
       console.error('[Popup] 手动截图失败:', error);
     } finally {
@@ -409,13 +410,13 @@ const PopupApp: React.FC = () => {
             type="button"
             onClick={() => chrome.runtime.openOptionsPage()}
             className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
-            title="设置"
+            title={t('popupOpenSettings')}
           >
             <Settings className="w-5 h-5" />
           </button>
         </div>
         <div className="mt-1 text-sm opacity-90">
-          {state.isUpdateMode ? '更新书签' : '添加书签'}
+          {state.isUpdateMode ? t('popupSubtitleUpdate') : t('popupSubtitleAdd')}
         </div>
       </header>
 
@@ -446,7 +447,7 @@ const PopupApp: React.FC = () => {
                 </div>
               )}
 
-              <section className="popup-preview-slot mb-3" aria-label="页面预览">
+              <section className="popup-preview-slot mb-3" aria-label={t('popupPreviewLabel')}>
                 <BookmarkEditor
                   layout="popup"
                   popupSection="preview"
@@ -489,11 +490,11 @@ const PopupApp: React.FC = () => {
                 className="mt-4 flex items-center gap-1.5 text-sm text-primary hover:text-primary-hover transition-colors"
               >
                 <Eye className="w-4 h-4" />
-                详细分析（页面结构）
+                {t('popupDetailAnalysis')}
               </button>
             </>
           ) : (
-            <div className="py-8 text-center text-sm text-gray-500">正在加载页面信息...</div>
+            <div className="py-8 text-center text-sm text-gray-500">{t('popupLoadingPageInfo')}</div>
           )}
         </div>
       </main>

@@ -4,6 +4,7 @@ import type { Bookmark, Category } from '../types/index';
 import TagInput from './TagInput';
 import CategoryTreeSelect from './CategoryTreeSelect';
 import { extractDomain } from '../utils/index';
+import { t } from '../i18n';
 
 export interface BookmarkEditorProps {
   value: Bookmark;
@@ -104,7 +105,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
             type="button"
             onClick={onRefreshScreenshot}
             disabled={refreshDisabled}
-            title="截取当前标签页画面（请在页面加载完成后再点）"
+            title={t('editorScreenshotHint')}
             className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white bg-gray-900/75 hover:bg-gray-900/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-md shadow-md backdrop-blur-sm transition-colors"
           >
             {isRefreshingScreenshot ? (
@@ -112,7 +113,11 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
             ) : (
               <Camera className="w-3.5 h-3.5" aria-hidden />
             )}
-            {isRefreshingScreenshot ? '截图中…' : value.imagePreviewUrl ? '更新截图' : '截取页面'}
+            {isRefreshingScreenshot
+              ? t('editorCapturingScreenshot')
+              : value.imagePreviewUrl
+                ? t('editorUpdateScreenshot')
+                : t('editorCapturePage')}
           </button>
         )}
       </div>
@@ -123,16 +128,16 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
     <div className={`space-y-4 ${isPopup ? '' : 'p-4'}`}>
       {value.aiGenerated && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <h4 className="text-sm font-medium text-blue-900 mb-1">AI 分析结果</h4>
+          <h4 className="text-sm font-medium text-blue-900 mb-1">{t('editorAiResultTitle')}</h4>
           <div className="text-sm text-blue-800 space-y-1">
             {value.aiGenerated.summary && (
               <p>
-                <strong>摘要:</strong> {value.aiGenerated.summary}
+                <strong>{t('editorSummaryLabel')}:</strong> {value.aiGenerated.summary}
               </p>
             )}
             {value.aiGenerated.keywords?.length > 0 && (
               <p>
-                <strong>关键词:</strong> {value.aiGenerated.keywords.join(', ')}
+                <strong>{t('editorKeywordsLabel')}:</strong> {value.aiGenerated.keywords.join(', ')}
               </p>
             )}
           </div>
@@ -142,7 +147,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           <FileText className="w-4 h-4 inline mr-1" />
-          标题 *
+          {t('editorTitleLabel')}
         </label>
         <input
           type="text"
@@ -152,7 +157,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
           className={`w-full px-3 py-2 text-sm border rounded-md bg-white text-gray-900 ${
             errors.title ? 'border-red-300' : 'border-gray-300 focus:ring-primary focus:border-primary'
           }`}
-          placeholder="输入书签标题..."
+          placeholder={t('editorTitlePlaceholder')}
         />
         {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title}</p>}
       </div>
@@ -160,7 +165,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           <ExternalLink className="w-4 h-4 inline mr-1" />
-          网址 *
+          {t('editorUrlLabel')}
         </label>
         <input
           type="url"
@@ -178,7 +183,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           <FileText className="w-4 h-4 inline mr-1" />
-          描述
+          {t('editorDescriptionLabel')}
         </label>
         <textarea
           value={value.description || ''}
@@ -190,7 +195,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
               ? 'border-red-300'
               : 'border-gray-300 focus:ring-primary focus:border-primary'
           }`}
-          placeholder="添加书签描述（可从页面 meta 自动填充）..."
+          placeholder={t('editorDescriptionPlaceholder')}
         />
         {errors.description && (
           <p className="mt-1 text-xs text-red-600">{errors.description}</p>
@@ -209,13 +214,13 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           <TagIcon className="w-4 h-4 inline mr-1" />
-          标签
+          {t('editorTagsLabel')}
         </label>
         <TagInput
           tagIds={value.tagIds || []}
           onTagIdsChange={(tagIds) => patch({ tagIds })}
           disabled={disabled}
-          placeholder="添加标签，按回车确认..."
+          placeholder={t('editorTagsPlaceholder')}
         />
       </div>
 
@@ -223,7 +228,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             <StickyNote className="w-4 h-4 inline mr-1" />
-            备注（可选）
+            {t('editorNotesLabel')}
           </label>
           <textarea
             value={value.notes || ''}
@@ -231,7 +236,7 @@ const BookmarkEditor: React.FC<BookmarkEditorProps> = ({
             disabled={disabled}
             rows={2}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md resize-none bg-white text-gray-900 focus:ring-primary focus:border-primary"
-            placeholder="添加备注..."
+            placeholder={t('editorNotesPlaceholder')}
           />
         </div>
       )}

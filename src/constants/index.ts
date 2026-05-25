@@ -3,6 +3,8 @@
  * 集中管理应用中的常量
  */
 
+import { getRuntimeLocaleTag } from '../i18n';
+
 // 应用信息
 export const APP_INFO = {
   name: 'TIGERMARKIII',
@@ -235,11 +237,11 @@ export const generateId = (): string => {
 };
 
 export const formatDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleDateString('zh-CN');
+  return new Date(timestamp).toLocaleDateString(getRuntimeLocaleTag());
 };
 
 export const formatDateTime = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleString('zh-CN');
+  return new Date(timestamp).toLocaleString(getRuntimeLocaleTag());
 };
 
 export const truncateText = (text: string, maxLength: number): string => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Globe, Clock, Code, FileText, Eye, Zap, Languages, Calendar } from 'lucide-react';
 import type { PageAnalysis } from '../types/index';
 import { fetchPageAnalysis } from '../services/pageAnalysisService';
+import { getRuntimeLocaleTag, t } from '../i18n';
 
 interface PageAnalysisModalProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
     if (result.success && result.data) {
       setPageData(result.data);
     } else {
-      setError(result.error || '页面分析失败');
+      setError(result.error || t('pageAnalysisFailed'));
     }
 
     setIsLoading(false);
@@ -58,7 +59,7 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
           <div className="flex items-center gap-3">
             <Eye className="w-6 h-6 text-primary" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              页面深度分析
+              {t('pageAnalysisTitle')}
             </h2>
           </div>
           
@@ -75,7 +76,7 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
           {isLoading && (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-3 text-gray-600 dark:text-gray-400">正在分析页面...</span>
+              <span className="ml-3 text-gray-600 dark:text-gray-400">{t('pageAnalysisLoading')}</span>
             </div>
           )}
 
@@ -86,7 +87,7 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                 onClick={analyzeCurrentPage}
                 className="mt-2 text-sm text-red-700 hover:text-red-800 underline"
               >
-                重试分析
+                {t('pageAnalysisRetry')}
               </button>
             </div>
           )}
@@ -97,23 +98,23 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
               <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  基本信息
+                  {t('pageAnalysisBasicInfo')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">页面标题:</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisPageTitle')}</span>
                     <p className="text-gray-900 dark:text-white mt-1">{pageData.title}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">网站域名:</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisDomain')}</span>
                     <p className="text-gray-900 dark:text-white mt-1">{pageData.siteInfo?.domain}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">网站类型:</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisSiteType')}</span>
                     <p className="text-gray-900 dark:text-white mt-1">{pageData.siteInfo?.siteType}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">网站名称:</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisSiteName')}</span>
                     <p className="text-gray-900 dark:text-white mt-1">{pageData.siteInfo?.siteName}</p>
                   </div>
                 </div>
@@ -124,32 +125,32 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                 <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    内容特征
+                    {t('pageAnalysisContentFeatures')}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {pageData.contentFeatures.wordCount}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">字数</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('pageAnalysisWordCount')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                         {pageData.contentStructure?.estimatedReadingTime}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">分钟阅读</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('pageAnalysisReadMinutes')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                         {pageData.contentFeatures.imageCount}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">图片数</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('pageAnalysisImageCount')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                         {pageData.contentFeatures.linkCount}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">链接数</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('pageAnalysisLinkCount')}</div>
                     </div>
                   </div>
                 </div>
@@ -160,12 +161,12 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <Code className="w-5 h-5" />
-                    页面结构
+                    {t('pageAnalysisStructure')}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {pageData.contentStructure.headings && (
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">标题结构:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisHeadingStructure')}</span>
                         <div className="mt-1">
                           {Object.entries(pageData.contentStructure.headings)
                             .filter(([key, value]) => key !== 'texts' && (value as number) > 0)
@@ -179,36 +180,36 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                       </div>
                     )}
                     <div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">特殊元素:</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisSpecialElements')}</span>
                       <div className="mt-1 space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-gray-700 dark:text-gray-300">表格:</span>
+                          <span className="text-gray-700 dark:text-gray-300">{t('pageAnalysisTables')}</span>
                           <span className="text-gray-900 dark:text-white">{pageData.contentStructure.tables}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-700 dark:text-gray-300">表单:</span>
+                          <span className="text-gray-700 dark:text-gray-300">{t('pageAnalysisForms')}</span>
                           <span className="text-gray-900 dark:text-white">{pageData.contentStructure.forms}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-700 dark:text-gray-300">视频:</span>
+                          <span className="text-gray-700 dark:text-gray-300">{t('pageAnalysisVideos')}</span>
                           <span className="text-gray-900 dark:text-white">{pageData.contentStructure.videos}</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">交互功能:</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisInteractiveFeatures')}</span>
                       <div className="mt-1 space-y-1">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${pageData.contentStructure.hasComments ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">评论区</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisComments')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${pageData.contentStructure.hasShareButtons ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">分享按钮</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisShareButtons')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${pageData.contentStructure.hasNavigation ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">导航栏</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisNavigation')}</span>
                         </div>
                       </div>
                     </div>
@@ -221,11 +222,11 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                 <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <Zap className="w-5 h-5" />
-                    技术特征
+                    {t('pageAnalysisTechnicalFeatures')}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">前端框架:</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisFrameworks')}</span>
                       <div className="mt-1">
                         {(pageData.technicalInfo.frameworks || []).length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -236,32 +237,32 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <span className="text-gray-500 dark:text-gray-400">未检测到</span>
+                          <span className="text-gray-500 dark:text-gray-400">{t('pageAnalysisNotDetected')}</span>
                         )}
                       </div>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">页面属性:</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisPageAttributes')}</span>
                       <div className="mt-1 space-y-1">
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${pageData.technicalInfo.isResponsive ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">响应式设计</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisResponsive')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`w-2 h-2 rounded-full ${pageData.siteInfo?.isSecure ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">HTTPS加密</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisHttps')}</span>
                         </div>
                       </div>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">资源统计:</span>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisResourceStats')}</span>
                       <div className="mt-1 space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-gray-700 dark:text-gray-300">脚本文件:</span>
+                          <span className="text-gray-700 dark:text-gray-300">{t('pageAnalysisScripts')}</span>
                           <span className="text-gray-900 dark:text-white">{pageData.technicalInfo.scripts}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-700 dark:text-gray-300">样式文件:</span>
+                          <span className="text-gray-700 dark:text-gray-300">{t('pageAnalysisStylesheets')}</span>
                           <span className="text-gray-900 dark:text-white">{pageData.technicalInfo.stylesheets}</span>
                         </div>
                       </div>
@@ -277,20 +278,20 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                   <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <Languages className="w-5 h-5" />
-                      语言信息
+                      {t('pageAnalysisLanguageInfo')}
                     </h3>
                     <div className="space-y-2">
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">检测语言:</span>
-                        <p className="text-gray-900 dark:text-white">{pageData.languageInfo.detectedLanguage === 'zh' ? '中文' : '英文'}</p>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisDetectedLanguage')}</span>
+                        <p className="text-gray-900 dark:text-white">{pageData.languageInfo.detectedLanguage === 'zh' ? t('pageLanguageZh') : t('pageLanguageEn')}</p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">HTML语言:</span>
-                        <p className="text-gray-900 dark:text-white">{pageData.languageInfo.htmlLang || '未设置'}</p>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisHtmlLanguage')}</span>
+                        <p className="text-gray-900 dark:text-white">{pageData.languageInfo.htmlLang || t('pageAnalysisNotSet')}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${pageData.languageInfo.isMultilingual ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">多语言支持</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{t('pageAnalysisMultilingual')}</span>
                       </div>
                     </div>
                   </div>
@@ -301,29 +302,29 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                   <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <Calendar className="w-5 h-5" />
-                      时间信息
+                      {t('pageAnalysisTimeInfo')}
                     </h3>
                     <div className="space-y-2">
                       {pageData.timeInfo.publishedTime && (
                         <div>
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">发布时间:</span>
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisPublishedTime')}</span>
                           <p className="text-gray-900 dark:text-white">
-                            {new Date(pageData.timeInfo.publishedTime).toLocaleDateString('zh-CN')}
+                            {new Date(pageData.timeInfo.publishedTime).toLocaleDateString(getRuntimeLocaleTag())}
                           </p>
                         </div>
                       )}
                       {pageData.timeInfo.modifiedTime && (
                         <div>
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">修改时间:</span>
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisModifiedTime')}</span>
                           <p className="text-gray-900 dark:text-white">
-                            {new Date(pageData.timeInfo.modifiedTime).toLocaleDateString('zh-CN')}
+                            {new Date(pageData.timeInfo.modifiedTime).toLocaleDateString(getRuntimeLocaleTag())}
                           </p>
                         </div>
                       )}
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">分析时间:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisExtractedTime')}</span>
                         <p className="text-gray-900 dark:text-white">
-                          {pageData.timeInfo.extractedAt ? new Date(pageData.timeInfo.extractedAt).toLocaleString('zh-CN') : '未知'}
+                          {pageData.timeInfo.extractedAt ? new Date(pageData.timeInfo.extractedAt).toLocaleString(getRuntimeLocaleTag()) : t('pageAnalysisUnknown')}
                         </p>
                       </div>
                     </div>
@@ -335,18 +336,18 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
               {pageData.seoMetadata && (
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    SEO元数据
+                    {t('pageAnalysisSeoMetadata')}
                   </h3>
                   <div className="space-y-3">
                     {pageData.seoMetadata.description && (
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">页面描述:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisPageDescription')}</span>
                         <p className="text-gray-900 dark:text-white mt-1 text-sm">{pageData.seoMetadata.description}</p>
                       </div>
                     )}
                     {pageData.seoMetadata.keywords && pageData.seoMetadata.keywords.length > 0 && (
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">关键词:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisKeywords')}</span>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {pageData.seoMetadata.keywords.map((keyword, index) => (
                             <span key={index} className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs rounded">
@@ -358,7 +359,7 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
                     )}
                     {pageData.seoMetadata.author && (
                       <div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">作者:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('pageAnalysisAuthor')}</span>
                         <p className="text-gray-900 dark:text-white">{pageData.seoMetadata.author}</p>
                       </div>
                     )}
@@ -376,14 +377,14 @@ const PageAnalysisModal: React.FC<PageAnalysisModalProps> = ({
             disabled={isLoading}
             className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
           >
-            重新分析
+            {t('pageAnalysisReanalyze')}
           </button>
           
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition-colors"
           >
-            关闭
+            {t('pageAnalysisClose')}
           </button>
         </div>
       </div>

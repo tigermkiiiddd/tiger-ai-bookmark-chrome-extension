@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Sparkles, Wand2, Loader, RefreshCw } from 'lucide-react';
+import { t } from '@/i18n';
 
 interface PopupStickyActionBarProps {
   isUpdateMode: boolean;
@@ -31,23 +32,23 @@ const PopupStickyActionBar: React.FC<PopupStickyActionBarProps> = ({
           type="button"
           onClick={onStartAnalysis}
           disabled={busy || !canUseAI}
-          title={!canUseAI ? '请先在设置中配置 AI API 密钥' : undefined}
+          title={!canUseAI ? t('actionBarConfigureAiKeyFirst') : undefined}
           className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isAnalyzing ? (
             <>
               <Loader className="w-4 h-4 animate-spin" />
-              分析中...
+              {t('actionBarAnalyzing')}
             </>
           ) : hasAnalyzed ? (
             <>
               <RefreshCw className="w-4 h-4" />
-              重新分析
+              {t('actionBarReanalyze')}
             </>
           ) : (
             <>
               <Wand2 className="w-4 h-4" />
-              开始分析
+              {t('actionBarStartAnalysis')}
             </>
           )}
         </button>
@@ -61,12 +62,12 @@ const PopupStickyActionBar: React.FC<PopupStickyActionBarProps> = ({
           {isAdding && !isAnalyzing ? (
             <>
               <Loader className="w-4 h-4 animate-spin" />
-              保存中...
+              {t('actionBarSaving')}
             </>
           ) : (
             <>
               <Plus className="w-4 h-4" />
-              {isUpdateMode ? '直接更新' : '直接添加'}
+              {isUpdateMode ? t('actionBarDirectUpdate') : t('actionBarDirectAdd')}
             </>
           )}
         </button>
@@ -81,12 +82,12 @@ const PopupStickyActionBar: React.FC<PopupStickyActionBarProps> = ({
             {isAdding && !isAnalyzing ? (
               <>
                 <Loader className="w-4 h-4 animate-spin" />
-                提交中...
+                {t('actionBarSubmitting')}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                {isUpdateMode ? 'AI智能更新' : 'AI智能添加'}
+                {isUpdateMode ? t('actionBarAiSmartUpdate') : t('actionBarAiSmartAdd')}
               </>
             )}
           </button>

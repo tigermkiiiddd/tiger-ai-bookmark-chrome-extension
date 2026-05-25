@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Settings, Plus, Skull } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { t } from '../i18n';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -33,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onToggleSidebar}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-          title={sidebarOpen ? '隐藏侧边栏' : '显示侧边栏'}
+          title={sidebarOpen ? t('headerHideSidebar') : t('headerShowSidebar')}
         >
           <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
@@ -68,16 +69,16 @@ const Header: React.FC<HeaderProps> = ({
         <button
           onClick={openAddBookmarkPopup}
           className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md transition-colors"
-          title="添加书签"
+          title={t('headerAddBookmark')}
         >
           <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">添加书签</span>
+          <span className="hidden sm:inline">{t('headerAddBookmark')}</span>
         </button>
 
         <button
           onClick={() => navigate('/graveyard')}
           className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors ${location.pathname === '/graveyard' ? 'text-blue-600 dark:text-blue-400' : ''}`}
-          title="URL 坟场"
+          title={t('headerGraveyard')}
         >
           <Skull className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
@@ -85,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onToggleTheme}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-          title="切换主题"
+          title={t('headerToggleTheme')}
         >
           {themeIcon}
         </button>
@@ -93,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => navigate('/settings')}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-          title="设置"
+          title={t('headerSettings')}
         >
           <Settings className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "TIGERMARKIII - AI Bookmark Manager",
+  "name": "__MSG_extName__",
   "version": "1.0.0",
-  "description": "AI 书签 Chrome 扩展，支持自动分类、层级标签、截图预览与死链检测",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "activeTab",
@@ -32,7 +33,7 @@
   ],
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "TIGERMARKIII",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

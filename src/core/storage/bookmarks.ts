@@ -9,6 +9,7 @@ import {
 } from './bookmarkNormalize';
 import type { Bookmark, AddBookmarkData, UpdateBookmarkData, SearchQuery } from '../../types/index';
 import { bookmarkMatchesStatusFilters } from '../../utils/statusFilter';
+import { getRuntimeLocaleTag } from '../../i18n';
 
 export class BookmarkStorageService {
   private static instance: BookmarkStorageService;
@@ -207,12 +208,12 @@ export class BookmarkStorageService {
               result = a.updatedAt - b.updatedAt;
               break;
             case 'title':
-              result = a.title.localeCompare(b.title, 'zh-CN');
+              result = a.title.localeCompare(b.title, getRuntimeLocaleTag());
               break;
             case 'category':
               const catA = a.categoryId || '';
               const catB = b.categoryId || '';
-              result = catA.localeCompare(catB, 'zh-CN');
+              result = catA.localeCompare(catB, getRuntimeLocaleTag());
               break;
           }
           

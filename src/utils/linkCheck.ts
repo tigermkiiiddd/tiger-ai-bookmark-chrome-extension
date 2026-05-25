@@ -1,4 +1,5 @@
 import type { Bookmark, Settings } from '../types/index';
+import { getRuntimeLocaleTag, t } from '../i18n';
 import type { LinkCheckOptions } from '../services/linkChecker/types';
 import { filterBookmarksToCheck } from './bookmarkQueue';
 
@@ -101,8 +102,8 @@ export function buildLinkCheckQueue(
 }
 
 export function formatLastLinkCheckTime(timestamp?: number): string {
-  if (!timestamp) return '从未检测';
-  return new Date(timestamp).toLocaleString('zh-CN', {
+  if (!timestamp) return t('linkCheckNeverChecked');
+  return new Date(timestamp).toLocaleString(getRuntimeLocaleTag(), {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
