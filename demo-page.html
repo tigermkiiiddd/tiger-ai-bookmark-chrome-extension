@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang=\"zh-CN\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>AI书签管理器 - 自动分析功能演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2196F3;
+        }
+        .feature {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        .code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 TIGERMARKIII - AI驱动的智能书签管理器</h1>
+    
+    <div class=\"highlight\">
+        <strong>🎉 自动分析功能已完成！</strong><br>
+        本页面可用于测试Chrome扩展的自动AI分析功能。
+    </div>
+
+    <h2>🚀 核心功能</h2>
+    
+    <div class=\"feature\">
+        <h3>✨ 智能内容分析</h3>
+        <p>使用Google Gemini AI自动分析网页内容，提取关键信息并生成智能标签。支持中文内容分析，准确识别文章主题和关键词。</p>
+    </div>
+
+    <div class=\"feature\">
+        <h3>🔄 自动化工作流</h3>
+        <p>页面加载完成后自动开始分析，无需手动操作。分析结果实时缓存，避免重复处理，提供流畅的用户体验。</p>
+    </div>
+
+    <div class=\"feature\">
+        <h3>🏷️ 智能标签生成</h3>
+        <p>基于页面内容自动生成相关标签，智能分类归档。支持自定义标签和AI标签的结合使用。</p>
+    </div>
+
+    <div class=\"feature\">
+        <h3>📱 美观的用户界面</h3>
+        <p>现代化的React界面设计，支持暗色/亮色主题切换。Popup界面优化，显示分析状态和结果预览。</p>
+    </div>
+
+    <h2>🛠 技术实现</h2>
+    
+    <div class=\"code\">
+// 自动分析核心代码示例
+class PageContentExtractor {
+  private async performAutoAnalysis(): Promise&lt;void&gt; {
+    // 检查AI自动标签功能是否启用
+    const settings = await chrome.storage.sync.get(['settings']);
+    if (!settings.settings?.aiAutoTagging) return;
+    
+    // 提取页面内容
+    const pageContent = this.extractPageContent();
+    
+    // 发送到background script进行AI分析
+    const response = await chrome.runtime.sendMessage({
+      type: 'ANALYZE_PAGE',
+      payload: { url: currentUrl, content: pageContent.content }
+    });
+    
+    // 缓存分析结果
+    if (response.success) {
+      await chrome.storage.local.set({
+        [`analysis_${btoa(currentUrl).substring(0, 20)}`]: response.data
+      });
+    }
+  }
+}
+    </div>
+
+    <h2>📋 测试说明</h2>
+    
+    <ol>
+        <li><strong>安装扩展</strong>: 在Chrome中加载 <code>dist</code> 文件夹</li>
+        <li><strong>配置API</strong>: 点击扩展图标 → 设置 → 输入Gemini API密钥</li>
+        <li><strong>访问本页面</strong>: 刷新此页面或访问其他网站</li>
+        <li><strong>查看结果</strong>: 等待2秒后点击扩展图标查看分析结果</li>
+        <li><strong>添加书签</strong>: 使用\"AI智能添加\"功能保存书签</li>
+    </ol>
+
+    <div class=\"highlight\">
+        <strong>💡 提示</strong>: 此页面包含足够的文本内容，适合测试AI分析功能。
+        分析完成后会在右上角显示通知，Popup界面会显示\"已自动分析\"标记。
+    </div>
+
+    <h2>🔍 分析内容示例</h2>
+    
+    <p>这是一篇关于Chrome扩展开发的技术文章。文章详细介绍了如何使用React、TypeScript、Vite等现代前端技术栈开发Chrome扩展。</p>
+    
+    <p>项目采用了Manifest V3规范，集成了Google Gemini AI进行智能内容分析。使用Zustand进行状态管理，Tailwind CSS进行样式设计。</p>
+    
+    <p>扩展具备书签管理、智能标签、自动分类、内容搜索等功能。支持数据导入导出、主题切换、多种视图模式。</p>
+
+    <h2>📚 相关技术</h2>
+    <ul>
+        <li>Chrome Extension API (Manifest V3)</li>
+        <li>React 18 + TypeScript</li>
+        <li>Vite 构建工具</li>
+        <li>Google Gemini AI API</li>
+        <li>Zustand 状态管理</li>
+        <li>Tailwind CSS 样式框架</li>
+        <li>Lucide React 图标库</li>
+        <li>Vitest 测试框架</li>
+    </ul>
+
+    <div style=\"margin-top: 40px; text-align: center; color: #666;\">
+        <p>🎯 测试页面 - 用于验证自动AI分析功能</p>
+        <p>© 2024 TIGERMARKIII - AI Bookmark Manager</p>
+    </div>
+</body>
+</html>

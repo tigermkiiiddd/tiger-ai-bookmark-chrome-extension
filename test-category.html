@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类选择功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-result {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TIGERMARKIII 分类选择功能测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">1. Chrome Storage 测试</div>
+            <button onclick="testChromeStorage()">测试 Chrome Storage</button>
+            <button onclick="clearStorage()">清除存储数据</button>
+            <div id="storage-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">2. 分类数据结构测试</div>
+            <button onclick="testCategoryStructure()">测试分类数据结构</button>
+            <div id="structure-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">3. 树形结构构建测试</div>
+            <button onclick="testTreeBuilding()">测试树形结构构建</button>
+            <div id="tree-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">4. 分类选择器集成测试</div>
+            <button onclick="openPopup()">打开弹窗测试</button>
+            <div id="popup-result" class="test-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟 Chrome Storage API（用于测试）
+        if (typeof chrome === 'undefined') {
+            window.chrome = {
+                storage: {
+                    local: {
+                        get: function(keys, callback) {
+                            const data = {};
+                            if (typeof keys === 'string') {
+                                data[keys] = localStorage.getItem(keys) ? JSON.parse(localStorage.getItem(keys)) : undefined;
+                            } else if (Array.isArray(keys)) {
+                                keys.forEach(key => {
+                                    data[key] = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : undefined;
+                                });
+                            }
+                            callback(data);
+                        },
+                        set: function(data, callback) {
+                            Object.keys(data).forEach(key => {
+                                localStorage.setItem(key, JSON.stringify(data[key]));
+                            });
+                            if (callback) callback();
+                        },
+                        clear: function(callback) {
+                            localStorage.clear();
+                            if (callback) callback();
+                        }
+                    }
+                }
+            };
+        }
+
+        // 默认分类数据（从常量文件复制）
+        const DEFAULT_CATEGORIES = [
+            // Level 1 categories
+            { name: '技术', color: '#3B82F6', icon: 'Code', level: 1, parentId: null, fullPath: '技术' },
+            { name: '设计', color: '#8B5CF6', icon: 'Palette', level: 1, parentId: null, fullPath: '设计' },
+            { name: '商业', color: '#10B981', icon: 'TrendingUp', level: 1, parentId: null, fullPath: '商业' },
+            { name: '学习', color: '#F59E0B', icon: 'BookOpen', level: 1, parentId: null, fullPath: '学习' },
+            { name: '生活', color: '#EF4444', icon: 'Heart', level: 1, parentId: null, fullPath: '生活' },
+            { name: '工具', color: '#6B7280', icon: 'Tool', level: 1, parentId: null, fullPath: '工具' },
+            
+            // Level 2 categories - 技术
+            { name: '前端开发', color: '#3B82F6', icon: 'Monitor', level: 2, parentId: 'tech', fullPath: '技术/前端开发' },
+            { name: '后端开发', color: '#1E40AF', icon: 'Server', level: 2, parentId: 'tech', fullPath: '技术/后端开发' },
+            { name: '移动开发', color: '#2563EB', icon: 'Smartphone', level: 2, parentId: 'tech', fullPath: '技术/移动开发' },
+            { name: '数据科学', color: '#1D4ED8', icon: 'BarChart3', level: 2, parentId: 'tech', fullPath: '技术/数据科学' },
+            
+            // Level 2 categories - 设计
+            { name: 'UI设计', color: '#8B5CF6', icon: 'Paintbrush', level: 2, parentId: 'design', fullPath: '设计/UI设计' },
+            { name: 'UX设计', color: '#7C3AED', icon: 'Users', level: 2, parentId: 'design', fullPath: '设计/UX设计' },
+            { name: '平面设计', color: '#6D28D9', icon: 'Image', level: 2, parentId: 'design', fullPath: '设计/平面设计' },
+            
+            // Level 2 categories - 商业
+            { name: '创业', color: '#10B981', icon: 'Rocket', level: 2, parentId: 'business', fullPath: '商业/创业' },
+            { name: '营销', color: '#059669', icon: 'Megaphone', level: 2, parentId: 'business', fullPath: '商业/营销' },
+            { name: '投资', color: '#047857', icon: 'DollarSign', level: 2, parentId: 'business', fullPath: '商业/投资' },
+            
+            // Level 2 categories - 学习
+            { name: '在线课程', color: '#F59E0B', icon: 'GraduationCap', level: 2, parentId: 'learning', fullPath: '学习/在线课程' },
+            { name: '技术文档', color: '#D97706', icon: 'FileText', level: 2, parentId: 'learning', fullPath: '学习/技术文档' },
+            { name: '教程', color: '#B45309', icon: 'PlayCircle', level: 2, parentId: 'learning', fullPath: '学习/教程' },
+            
+            // Level 2 categories - 生活
+            { name: '健康', color: '#EF4444', icon: 'Activity', level: 2, parentId: 'life', fullPath: '生活/健康' },
+            { name: '旅行', color: '#DC2626', icon: 'MapPin', level: 2, parentId: 'life', fullPath: '生活/旅行' },
+            { name: '美食', color: '#B91C1C', icon: 'Coffee', level: 2, parentId: 'life', fullPath: '生活/美食' },
+            
+            // Level 2 categories - 工具
+            { name: '开发工具', color: '#6B7280', icon: 'Wrench', level: 2, parentId: 'tools', fullPath: '工具/开发工具' },
+            { name: '效率工具', color: '#4B5563', icon: 'Zap', level: 2, parentId: 'tools', fullPath: '工具/效率工具' },
+            { name: '设计工具', color: '#374151', icon: 'Pen', level: 2, parentId: 'tools', fullPath: '工具/设计工具' }
+        ];
+
+        function testChromeStorage() {
+            const resultDiv = document.getElementById('storage-result');
+            resultDiv.innerHTML = '正在测试 Chrome Storage...';
+            
+            try {
+                chrome.storage.local.get(['categories'], function(result) {
+                    const categories = result.categories || [];
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `Chrome Storage 测试成功！\n存储的分类数量: ${categories.length}\n\n分类数据:\n${JSON.stringify(categories, null, 2)}`;
+                });
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `Chrome Storage 测试失败: ${error.message}`;
+            }
+        }
+
+        function clearStorage() {
+            const resultDiv = document.getElementById('storage-result');
+            
+            try {
+                chrome.storage.local.clear(function() {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = '存储数据已清除！';
+                });
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `清除存储失败: ${error.message}`;
+            }
+        }
+
+        function testCategoryStructure() {
+            const resultDiv = document.getElementById('structure-result');
+            resultDiv.innerHTML = '正在测试分类数据结构...';
+            
+            try {
+                // 验证默认分类结构
+                const level1Categories = DEFAULT_CATEGORIES.filter(cat => cat.level === 1);
+                const level2Categories = DEFAULT_CATEGORIES.filter(cat => cat.level === 2);
+                
+                let structureReport = `分类数据结构测试结果:\n`;
+                structureReport += `总分类数量: ${DEFAULT_CATEGORIES.length}\n`;
+                structureReport += `一级分类数量: ${level1Categories.length}\n`;
+                structureReport += `二级分类数量: ${level2Categories.length}\n\n`;
+                
+                structureReport += `一级分类:\n`;
+                level1Categories.forEach(cat => {
+                    structureReport += `- ${cat.name} (${cat.color})\n`;
+                });
+                
+                structureReport += `\n二级分类 (按父分类分组):\n`;
+                const parentIds = [...new Set(level2Categories.map(cat => cat.parentId))];
+                parentIds.forEach(parentId => {
+                    const children = level2Categories.filter(cat => cat.parentId === parentId);
+                    structureReport += `- ${parentId}: ${children.map(c => c.name).join(', ')}\n`;
+                });
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = structureReport;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `分类数据结构测试失败: ${error.message}`;
+            }
+        }
+
+        function buildCategoryTree(categories) {
+            if (categories.length === 0) {
+                return [];
+            }
+            
+            // 创建节点映射
+            const nodeMap = new Map();
+            categories.forEach(category => {
+                nodeMap.set(category.id, {
+                    ...category,
+                    children: []
+                });
+            });
+            
+            // 构建树形结构
+            const rootNodes = [];
+            categories.forEach(category => {
+                const node = nodeMap.get(category.id);
+                if (category.parentId && nodeMap.has(category.parentId)) {
+                    const parent = nodeMap.get(category.parentId);
+                    parent.children.push(node);
+                } else {
+                    rootNodes.push(node);
+                }
+            });
+            
+            return rootNodes;
+        }
+
+        function testTreeBuilding() {
+            const resultDiv = document.getElementById('tree-result');
+            resultDiv.innerHTML = '正在测试树形结构构建...';
+            
+            try {
+                // 模拟带ID的分类数据
+                const categoriesWithIds = DEFAULT_CATEGORIES.map((cat, index) => ({
+                    ...cat,
+                    id: cat.level === 1 ? cat.name.toLowerCase() : `${cat.parentId}_${index}`,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    bookmarkCount: 0
+                }));
+                
+                // 修正parentId为实际的ID
+                const idMap = {};
+                categoriesWithIds.forEach(cat => {
+                    if (cat.level === 1) {
+                        const key = cat.name === '技术' ? 'tech' :
+                                   cat.name === '设计' ? 'design' :
+                                   cat.name === '商业' ? 'business' :
+                                   cat.name === '学习' ? 'learning' :
+                                   cat.name === '生活' ? 'life' :
+                                   cat.name === '工具' ? 'tools' : cat.name.toLowerCase();
+                        idMap[key] = cat.id;
+                    }
+                });
+                
+                categoriesWithIds.forEach(cat => {
+                    if (cat.level === 2 && cat.parentId) {
+                        cat.parentId = idMap[cat.parentId] || cat.parentId;
+                    }
+                });
+                
+                const tree = buildCategoryTree(categoriesWithIds);
+                
+                let treeReport = `树形结构构建测试结果:\n`;
+                treeReport += `根节点数量: ${tree.length}\n\n`;
+                
+                tree.forEach(rootNode => {
+                    treeReport += `${rootNode.name} (${rootNode.children.length} 个子分类)\n`;
+                    rootNode.children.forEach(child => {
+                        treeReport += `  └─ ${child.name}\n`;
+                    });
+                    treeReport += '\n';
+                });
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = treeReport;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `树形结构构建测试失败: ${error.message}\n\n错误堆栈:\n${error.stack}`;
+            }
+        }
+
+        function openPopup() {
+            const resultDiv = document.getElementById('popup-result');
+            resultDiv.className = 'test-result success';
+            resultDiv.innerHTML = '请打开浏览器开发者工具，然后访问 http://localhost:5176 来测试实际的弹窗功能。\n\n建议测试步骤：\n1. 打开 http://localhost:5176\n2. 打开开发者工具的控制台\n3. 查看分类加载和树形结构构建的日志\n4. 测试分类选择功能';
+        }
+
+        // 页面加载时自动运行基础测试
+        window.onload = function() {
+            console.log('分类选择功能测试页面已加载');
+            testCategoryStructure();
+        };
+    </script>
+</body>
+</html>

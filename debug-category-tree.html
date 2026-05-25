@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类树形结构深度调试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .category-tree {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .category-item {
+            margin: 2px 0;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        .level-0 { background: #e3f2fd; margin-left: 0px; }
+        .level-1 { background: #f3e5f5; margin-left: 20px; }
+        .level-2 { background: #e8f5e8; margin-left: 40px; }
+        
+        .data-structure {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005a9e; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🔍 分类树形结构深度调试分析</h1>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">1. 原始分类数据结构验证</h2>
+        <button onclick="analyzeRawData()">分析原始数据</button>
+        <div id="raw-data-analysis"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">2. ID映射关系验证</h2>
+        <button onclick="analyzeIdMapping()">验证ID映射</button>
+        <div id="id-mapping-analysis"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">3. buildCategoryTree函数调试</h2>
+        <button onclick="debugBuildTree()">调试树构建</button>
+        <div id="tree-build-debug"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">4. 树形结构可视化</h2>
+        <button onclick="visualizeTree()">可视化树结构</button>
+        <div id="tree-visualization"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2 class="debug-title">5. 分类选择器模拟测试</h2>
+        <button onclick="simulateCategorySelector()">模拟选择器</button>
+        <div id="selector-simulation"></div>
+    </div>
+
+    <script>
+        // 模拟Chrome Storage API
+        const mockStorage = {
+            local: {
+                data: {},
+                get: function(keys, callback) {
+                    const result = {};
+                    if (Array.isArray(keys)) {
+                        keys.forEach(key => {
+                            if (this.data[key] !== undefined) {
+                                result[key] = this.data[key];
+                            }
+                        });
+                    } else if (typeof keys === 'string') {
+                        if (this.data[keys] !== undefined) {
+                            result[keys] = this.data[keys];
+                        }
+                    }
+                    callback(result);
+                },
+                set: function(items, callback) {
+                    Object.assign(this.data, items);
+                    if (callback) callback();
+                },
+                clear: function(callback) {
+                    this.data = {};
+                    if (callback) callback();
+                }
+            }
+        };
+        
+        // 模拟chrome对象
+        if (typeof chrome === 'undefined') {
+            window.chrome = { storage: mockStorage };
+        }
+        
+        // 默认分类数据（与实际项目保持一致）
+        const DEFAULT_CATEGORIES = [
+            // 一级分类
+            { name: '技术', color: '#3B82F6', icon: '💻', level: 1, parentId: undefined, fullPath: '技术' },
+            { name: '设计', color: '#EF4444', icon: '🎨', level: 1, parentId: undefined, fullPath: '设计' },
+            { name: '工具', color: '#6B7280', icon: '🔧', level: 1, parentId: undefined, fullPath: '工具' },
+            { name: '学习', color: '#F97316', icon: '📚', level: 1, parentId: undefined, fullPath: '学习' },
+            { name: '娱乐', color: '#A855F7', icon: '🎮', level: 1, parentId: undefined, fullPath: '娱乐' },
+            { name: '其他', color: '#64748B', icon: '📁', level: 1, parentId: undefined, fullPath: '其他' },
+            
+            // 二级分类 - 技术
+            { name: '前端开发', color: '#10B981', icon: '🌐', level: 2, parentId: 'tech', fullPath: '技术/前端开发' },
+            { name: '后端开发', color: '#8B5CF6', icon: '⚙️', level: 2, parentId: 'tech', fullPath: '技术/后端开发' },
+            { name: '数据库', color: '#F59E0B', icon: '🗄️', level: 2, parentId: 'tech', fullPath: '技术/数据库' },
+            
+            // 二级分类 - 设计
+            { name: 'UI设计', color: '#EC4899', icon: '🖌️', level: 2, parentId: 'design', fullPath: '设计/UI设计' },
+            { name: 'UX设计', color: '#14B8A6', icon: '👥', level: 2, parentId: 'design', fullPath: '设计/UX设计' },
+            
+            // 二级分类 - 工具
+            { name: '开发工具', color: '#374151', icon: '🛠️', level: 2, parentId: 'tools', fullPath: '工具/开发工具' },
+            { name: '设计工具', color: '#9CA3AF', icon: '✏️', level: 2, parentId: 'tools', fullPath: '工具/设计工具' },
+            
+            // 二级分类 - 学习
+            { name: '教程', color: '#84CC16', icon: '📖', level: 2, parentId: 'learning', fullPath: '学习/教程' },
+            { name: '文档', color: '#22D3EE', icon: '📄', level: 2, parentId: 'learning', fullPath: '学习/文档' }
+        ];
+        
+        // 创建固定的ID映射（与修复后的逻辑一致）
+        function createFixedIdMapping() {
+            const baseTimestamp = 1703123456789; // 固定时间戳
+            return {
+                'tech': `category_${baseTimestamp}_tech`,
+                'design': `category_${baseTimestamp}_design`,
+                'tools': `category_${baseTimestamp}_tools`,
+                'learning': `category_${baseTimestamp}_learning`,
+                'entertainment': `category_${baseTimestamp}_entertainment`,
+                'other': `category_${baseTimestamp}_other`
+            };
+        }
+        
+        // 创建完整的分类数据（包含正确的ID）
+        function createCategoriesWithIds() {
+            const categoryIdMap = createFixedIdMapping();
+            const categoriesWithIds = [];
+            
+            DEFAULT_CATEGORIES.forEach(defaultCat => {
+                let parentId = undefined;
+                
+                // 为二级分类设置正确的parentId
+                if (defaultCat.level === 2 && defaultCat.parentId) {
+                    parentId = categoryIdMap[defaultCat.parentId];
+                }
+                
+                let categoryId;
+                if (defaultCat.level === 1) {
+                    // 为一级分类使用预定义的映射ID
+                    let categoryKey = '';
+                    switch(defaultCat.name) {
+                        case '技术': categoryKey = 'tech'; break;
+                        case '设计': categoryKey = 'design'; break;
+                        case '工具': categoryKey = 'tools'; break;
+                        case '学习': categoryKey = 'learning'; break;
+                        case '娱乐': categoryKey = 'entertainment'; break;
+                        case '其他': categoryKey = 'other'; break;
+                    }
+                    categoryId = categoryIdMap[categoryKey] || `category_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                } else {
+                    categoryId = `category_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                }
+                
+                const category = {
+                    id: categoryId,
+                    name: defaultCat.name,
+                    color: defaultCat.color,
+                    icon: defaultCat.icon,
+                    bookmarkCount: 0,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    level: defaultCat.level,
+                    parentId,
+                    fullPath: defaultCat.fullPath
+                };
+                
+                categoriesWithIds.push(category);
+            });
+            
+            return categoriesWithIds;
+        }
+        
+        // buildCategoryTree函数（与实际项目一致）
+        function buildCategoryTree(categories) {
+            console.log('buildCategoryTree called with categories:', categories);
+            
+            if (categories.length === 0) {
+                console.log('警告：传入的分类数组为空！');
+                return [];
+            }
+            
+            console.log(`分类数据加载成功，共${categories.length}个分类`);
+            
+            // 创建节点映射
+            const nodeMap = new Map();
+            const rootNodes = [];
+
+            // 首先创建所有节点
+            categories.forEach(category => {
+                const node = {
+                    name: category.name,
+                    fullName: category.fullPath || category.name,
+                    children: {},
+                    originalCategory: category
+                };
+                nodeMap.set(category.id, node);
+            });
+
+            console.log('nodeMap created:', Array.from(nodeMap.entries()));
+
+            // 然后构建树结构
+            categories.forEach(category => {
+                const node = nodeMap.get(category.id);
+                if (!node) return;
+
+                if (!category.parentId) {
+                    // 根节点
+                    rootNodes.push(node);
+                } else {
+                    // 子节点，找到父节点并添加
+                    const parentNode = nodeMap.get(category.parentId);
+                    if (parentNode) {
+                        parentNode.children[category.name] = node;
+                    } else {
+                        // 如果找不到父节点，作为根节点处理
+                        console.warn(`Parent ${category.parentId} not found for category ${category.name}, treating as root`);
+                        rootNodes.push(node);
+                    }
+                }
+            });
+
+            console.log('rootNodes built:', rootNodes);
+            console.log(`树形结构构建完成，根节点数量：${rootNodes.length}`);
+            return rootNodes;
+        }
+        
+        // 分析原始数据结构
+        function analyzeRawData() {
+            const resultDiv = document.getElementById('raw-data-analysis');
+            let report = '';
+            
+            try {
+                const categories = createCategoriesWithIds();
+                
+                report += `<div class="test-result info">✅ 成功创建 ${categories.length} 个分类</div>`;
+                
+                // 分析层级结构
+                const level1 = categories.filter(c => c.level === 1);
+                const level2 = categories.filter(c => c.level === 2);
+                
+                report += `<div class="test-result success">📊 层级分析：<br>`;
+                report += `- 一级分类：${level1.length} 个<br>`;
+                report += `- 二级分类：${level2.length} 个</div>`;
+                
+                // 检查必要字段
+                const missingFields = [];
+                categories.forEach((cat, index) => {
+                    if (!cat.id) missingFields.push(`分类${index}: 缺少id`);
+                    if (!cat.name) missingFields.push(`分类${index}: 缺少name`);
+                    if (cat.level === undefined) missingFields.push(`分类${index}: 缺少level`);
+                    if (!cat.fullPath) missingFields.push(`分类${index}: 缺少fullPath`);
+                });
+                
+                if (missingFields.length === 0) {
+                    report += `<div class="test-result success">✅ 所有分类都包含必要字段</div>`;
+                } else {
+                    report += `<div class="test-result error">❌ 发现字段缺失：<br>${missingFields.join('<br>')}</div>`;
+                }
+                
+                // 显示原始数据结构
+                report += `<div class="test-result info">📋 原始数据结构：</div>`;
+                report += `<div class="data-structure">${JSON.stringify(categories, null, 2)}</div>`;
+                
+            } catch (error) {
+                report += `<div class="test-result error">❌ 分析失败：${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML = report;
+        }
+        
+        // 分析ID映射关系
+        function analyzeIdMapping() {
+            const resultDiv = document.getElementById('id-mapping-analysis');
+            let report = '';
+            
+            try {
+                const categoryIdMap = createFixedIdMapping();
+                const categories = createCategoriesWithIds();
+                
+                report += `<div class="test-result info">🔗 ID映射表：</div>`;
+                report += `<div class="data-structure">${JSON.stringify(categoryIdMap, null, 2)}</div>`;
+                
+                // 验证父子关系
+                const level2Categories = categories.filter(c => c.level === 2);
+                let relationshipErrors = [];
+                
+                level2Categories.forEach(child => {
+                    if (child.parentId) {
+                        const parent = categories.find(p => p.id === child.parentId);
+                        if (!parent) {
+                            relationshipErrors.push(`${child.name} 的父分类ID ${child.parentId} 不存在`);
+                        } else if (parent.level !== 1) {
+                            relationshipErrors.push(`${child.name} 的父分类 ${parent.name} 不是一级分类`);
+                        }
+                    } else {
+                        relationshipErrors.push(`${child.name} 缺少parentId`);
+                    }
+                });
+                
+                if (relationshipErrors.length === 0) {
+                    report += `<div class="test-result success">✅ 所有父子关系正确</div>`;
+                } else {
+                    report += `<div class="test-result error">❌ 发现关系错误：<br>${relationshipErrors.join('<br>')}</div>`;
+                }
+                
+                // 显示父子关系映射
+                report += `<div class="test-result info">👨‍👩‍👧‍👦 父子关系映射：</div>`;
+                const relationshipMap = {};
+                categories.filter(c => c.level === 1).forEach(parent => {
+                    const children = categories.filter(c => c.parentId === parent.id);
+                    relationshipMap[parent.name] = children.map(c => c.name);
+                });
+                report += `<div class="data-structure">${JSON.stringify(relationshipMap, null, 2)}</div>`;
+                
+            } catch (error) {
+                report += `<div class="test-result error">❌ 分析失败：${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML = report;
+        }
+        
+        // 调试buildCategoryTree函数
+        function debugBuildTree() {
+            const resultDiv = document.getElementById('tree-build-debug');
+            let report = '';
+            
+            try {
+                const categories = createCategoriesWithIds();
+                
+                // 清空控制台日志
+                console.clear();
+                
+                // 调用buildCategoryTree并捕获日志
+                const originalLog = console.log;
+                const originalWarn = console.warn;
+                const logs = [];
+                
+                console.log = (...args) => {
+                    logs.push({ type: 'log', message: args.join(' ') });
+                    originalLog.apply(console, args);
+                };
+                
+                console.warn = (...args) => {
+                    logs.push({ type: 'warn', message: args.join(' ') });
+                    originalWarn.apply(console, args);
+                };
+                
+                const tree = buildCategoryTree(categories);
+                
+                // 恢复原始console
+                console.log = originalLog;
+                console.warn = originalWarn;
+                
+                report += `<div class="test-result success">✅ buildCategoryTree执行完成</div>`;
+                report += `<div class="test-result info">📊 结果统计：<br>`;
+                report += `- 根节点数量：${tree.length}<br>`;
+                report += `- 总节点数量：${categories.length}</div>`;
+                
+                // 显示执行日志
+                report += `<div class="test-result info">📝 执行日志：</div>`;
+                report += `<div class="data-structure">`;
+                logs.forEach(log => {
+                    const color = log.type === 'warn' ? '#856404' : '#0c5460';
+                    report += `<div style="color: ${color}">[${log.type.toUpperCase()}] ${log.message}</div>`;
+                });
+                report += `</div>`;
+                
+                // 显示树结构数据
+                report += `<div class="test-result info">🌳 树结构数据：</div>`;
+                report += `<div class="data-structure">${JSON.stringify(tree, null, 2)}</div>`;
+                
+            } catch (error) {
+                report += `<div class="test-result error">❌ 调试失败：${error.message}</div>`;
+                console.error('Debug error:', error);
+            }
+            
+            resultDiv.innerHTML = report;
+        }
+        
+        // 可视化树结构
+        function visualizeTree() {
+            const resultDiv = document.getElementById('tree-visualization');
+            let report = '';
+            
+            try {
+                const categories = createCategoriesWithIds();
+                const tree = buildCategoryTree(categories);
+                
+                report += `<div class="test-result success">🌳 树形结构可视化</div>`;
+                report += `<div class="category-tree">`;
+                
+                function renderNode(node, level = 0) {
+                    let html = `<div class="category-item level-${level}">`;
+                    html += `${'  '.repeat(level)}${node.originalCategory?.icon || '📁'} ${node.name}`;
+                    html += ` <small>(${node.fullName})</small>`;
+                    html += `</div>`;
+                    
+                    // 渲染子节点
+                    Object.values(node.children).forEach(child => {
+                        html += renderNode(child, level + 1);
+                    });
+                    
+                    return html;
+                }
+                
+                tree.forEach(rootNode => {
+                    report += renderNode(rootNode);
+                });
+                
+                report += `</div>`;
+                
+                // 统计信息
+                let totalNodes = 0;
+                let maxDepth = 0;
+                
+                function countNodes(node, depth = 0) {
+                    totalNodes++;
+                    maxDepth = Math.max(maxDepth, depth);
+                    Object.values(node.children).forEach(child => {
+                        countNodes(child, depth + 1);
+                    });
+                }
+                
+                tree.forEach(rootNode => countNodes(rootNode));
+                
+                report += `<div class="test-result info">📊 树结构统计：<br>`;
+                report += `- 总节点数：${totalNodes}<br>`;
+                report += `- 最大深度：${maxDepth + 1}<br>`;
+                report += `- 根节点数：${tree.length}</div>`;
+                
+            } catch (error) {
+                report += `<div class="test-result error">❌ 可视化失败：${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML = report;
+        }
+        
+        // 模拟分类选择器
+        function simulateCategorySelector() {
+            const resultDiv = document.getElementById('selector-simulation');
+            let report = '';
+            
+            try {
+                const categories = createCategoriesWithIds();
+                const tree = buildCategoryTree(categories);
+                
+                report += `<div class="test-result success">🎯 分类选择器模拟测试</div>`;
+                
+                // 模拟选择器渲染逻辑
+                function simulateRender(tree) {
+                    let html = '<div style="border: 1px solid #ddd; padding: 10px; background: white;">';
+                    
+                    function renderOption(node, level = 0) {
+                        const paddingLeft = 12 + level * 16;
+                        let optionHtml = `<div style="padding-left: ${paddingLeft}px; padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;" onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='white'">`;
+                        optionHtml += `${node.originalCategory?.icon || '📁'} ${node.name}`;
+                        optionHtml += `</div>`;
+                        
+                        // 渲染子选项
+                        Object.values(node.children).forEach(child => {
+                            optionHtml += renderOption(child, level + 1);
+                        });
+                        
+                        return optionHtml;
+                    }
+                    
+                    if (tree.length > 0) {
+                        tree.forEach(rootNode => {
+                            html += renderOption(rootNode);
+                        });
+                    } else {
+                        html += '<div style="padding: 20px; text-align: center; color: #666;">暂无分类，可以创建新分类</div>';
+                    }
+                    
+                    html += '</div>';
+                    return html;
+                }
+                
+                const renderedSelector = simulateRender(tree);
+                report += `<div class="test-result info">🖥️ 选择器渲染结果：</div>`;
+                report += renderedSelector;
+                
+                // 测试选择功能
+                report += `<div class="test-result info">🔍 选择功能测试：</div>`;
+                const testSelections = ['技术', '技术/前端开发', '设计/UI设计', '不存在的分类'];
+                
+                testSelections.forEach(selection => {
+                    const found = categories.find(c => c.fullPath === selection);
+                    if (found) {
+                        report += `<div class="test-result success">✅ "${selection}" - 找到分类</div>`;
+                    } else {
+                        report += `<div class="test-result warning">⚠️ "${selection}" - 未找到分类</div>`;
+                    }
+                });
+                
+            } catch (error) {
+                report += `<div class="test-result error">❌ 模拟失败：${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML = report;
+        }
+        
+        // 页面加载完成后自动运行基础分析
+        window.addEventListener('load', () => {
+            console.log('🔍 分类树形结构深度调试页面已加载');
+            analyzeRawData();
+        });
+    </script>
+</body>
+</html>

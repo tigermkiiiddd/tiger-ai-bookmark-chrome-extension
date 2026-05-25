@@ -1,0 +1,21 @@
+node_modules
+dist/
+_reference/
+
+# Local env and secrets
+.env
+.env.*
+
+# Local editor / agent settings
+.claude/settings.local.json
+.vscode/settings.json
+
+# Playwright MCP logs
+.playwright-mcp/
+
+# MCP host
+mcp-host/
+
+# Screenshots & snapshots
+*.png
+*-snapshot.md

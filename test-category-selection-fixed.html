@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类选择功能测试 - 修复后</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 12px;
+        }
+        .test-section {
+            margin: 24px 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background-color: #f9fafb;
+        }
+        .test-result {
+            margin: 16px 0;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+        }
+        .error {
+            background-color: #fef2f2;
+            border: 1px solid #dc2626;
+            color: #dc2626;
+        }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #d97706;
+            color: #92400e;
+        }
+        .info {
+            background-color: #dbeafe;
+            border: 1px solid #2563eb;
+            color: #1d4ed8;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .category-tree {
+            margin: 16px 0;
+            font-family: monospace;
+        }
+        .category-item {
+            padding: 4px 0;
+            border-left: 2px solid #e5e7eb;
+            padding-left: 8px;
+            margin: 2px 0;
+        }
+        .category-level-1 {
+            border-left-color: #2563eb;
+            font-weight: bold;
+        }
+        .category-level-2 {
+            border-left-color: #16a34a;
+            margin-left: 20px;
+        }
+        .log-section {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 分类选择功能测试 - 修复后版本</h1>
+        
+        <div class="test-section">
+            <h2>📊 测试1: 分类数据加载与验证</h2>
+            <button onclick="testCategoryDataLoading()">测试分类数据加载</button>
+            <div id="data-loading-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🌳 测试2: buildCategoryTree函数 - 修复后版本</h2>
+            <button onclick="testBuildCategoryTreeFixed()">测试修复后的buildCategoryTree</button>
+            <div id="build-tree-fixed-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 测试3: 分类选择功能完整性测试</h2>
+            <button onclick="testCategorySelectionComplete()">完整功能测试</button>
+            <div id="selection-complete-result" class="test-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 控制台日志</h2>
+            <button onclick="clearLogs()">清空日志</button>
+            <div id="console-logs" class="log-section"></div>
+        </div>
+    </div>
+
+    <script>
+        // 日志记录功能
+        const originalConsoleLog = console.log;
+        const originalConsoleWarn = console.warn;
+        const originalConsoleError = console.error;
+        
+        function logToPage(message, type = 'log') {
+            const logsDiv = document.getElementById('console-logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            logsDiv.textContent += logEntry;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToPage(args.join(' '), 'log');
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            logToPage(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToPage(args.join(' '), 'error');
+        };
+        
+        function clearLogs() {
+            document.getElementById('console-logs').textContent = '';
+        }
+        
+        // 模拟默认分类数据
+        const defaultCategories = [
+            { name: '工作学习', color: '#3b82f6', icon: '💼', level: 1, parentId: null, fullPath: '工作学习' },
+            { name: '技术文档', color: '#10b981', icon: '📚', level: 2, parentId: '工作学习', fullPath: '工作学习/技术文档' },
+            { name: '项目资料', color: '#8b5cf6', icon: '📁', level: 2, parentId: '工作学习', fullPath: '工作学习/项目资料' },
+            { name: '生活娱乐', color: '#f59e0b', icon: '🎮', level: 1, parentId: null, fullPath: '生活娱乐' },
+            { name: '影音视频', color: '#ef4444', icon: '🎬', level: 2, parentId: '生活娱乐', fullPath: '生活娱乐/影音视频' },
+            { name: '购物网站', color: '#06b6d4', icon: '🛒', level: 2, parentId: '生活娱乐', fullPath: '生活娱乐/购物网站' },
+            { name: '开发工具', color: '#84cc16', icon: '🔧', level: 1, parentId: null, fullPath: '开发工具' }
+        ];
+        
+        // 修复后的buildCategoryTree函数
+        function buildCategoryTreeFixed(categories) {
+            console.log('buildCategoryTree called with categories:', categories);
+            
+            // 数据验证
+            if (!Array.isArray(categories) || categories.length === 0) {
+                console.log('警告：传入的分类数组为空或无效！');
+                return [];
+            }
+            
+            console.log(`分类数据加载成功，共${categories.length}个分类`);
+            
+            // 按level排序，确保父分类先于子分类处理
+            const sortedCategories = [...categories].sort((a, b) => (a.level || 0) - (b.level || 0));
+            console.log('排序后的分类:', sortedCategories.map(c => `${c.name}(level:${c.level})`));
+            
+            // 创建节点映射
+            const nodeMap = new Map();
+            const rootNodes = [];
+            
+            // 首先创建所有节点
+            sortedCategories.forEach(category => {
+                const node = {
+                    name: category.name,
+                    fullName: category.fullPath || category.name,
+                    children: {},
+                    originalCategory: category
+                };
+                nodeMap.set(category.id || category.name, node);
+            });
+            
+            console.log('nodeMap created:', Array.from(nodeMap.keys()));
+            
+            // 然后构建树结构
+            sortedCategories.forEach(category => {
+                const node = nodeMap.get(category.id || category.name);
+                if (!node) {
+                    console.warn(`Node not found for category ${category.id || category.name}`);
+                    return;
+                }
+                
+                if (!category.parentId || category.level === 1) {
+                    // 根节点（level 1或无parentId）
+                    if (!rootNodes.find(n => n.originalCategory?.name === category.name)) {
+                        rootNodes.push(node);
+                        console.log(`添加根节点: ${category.name}`);
+                    }
+                } else {
+                    // 子节点，找到父节点并添加
+                    const parentNode = nodeMap.get(category.parentId);
+                    if (parentNode) {
+                        // 防止重复添加
+                        if (!parentNode.children[category.name]) {
+                            parentNode.children[category.name] = node;
+                            console.log(`添加子节点: ${category.name} -> ${category.parentId}`);
+                        }
+                    } else {
+                        // 如果找不到父节点，作为根节点处理
+                        console.warn(`Parent ${category.parentId} not found for category ${category.name}, treating as root`);
+                        if (!rootNodes.find(n => n.originalCategory?.name === category.name)) {
+                            rootNodes.push(node);
+                        }
+                    }
+                }
+            });
+            
+            console.log('rootNodes built:', rootNodes.map(n => n.name));
+            console.log(`树形结构构建完成，根节点数量：${rootNodes.length}`);
+            return rootNodes;
+        }
+        
+        // 测试函数
+        function testCategoryDataLoading() {
+            const resultDiv = document.getElementById('data-loading-result');
+            
+            try {
+                console.log('开始测试分类数据加载...');
+                
+                // 添加ID到分类数据
+                const categoriesWithIds = defaultCategories.map(cat => ({
+                    ...cat,
+                    id: cat.name // 使用name作为id进行测试
+                }));
+                
+                let report = `分类数据加载测试结果:\n`;
+                report += `总分类数量: ${categoriesWithIds.length}\n`;
+                report += `Level 1分类: ${categoriesWithIds.filter(c => c.level === 1).length}个\n`;
+                report += `Level 2分类: ${categoriesWithIds.filter(c => c.level === 2).length}个\n\n`;
+                
+                report += `分类详情:\n`;
+                categoriesWithIds.forEach(cat => {
+                    report += `- ${cat.name} (Level ${cat.level}, Parent: ${cat.parentId || 'None'})\n`;
+                });
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.textContent = report;
+                
+                console.log('分类数据加载测试完成');
+                
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = `分类数据加载测试失败: ${error.message}`;
+                console.error('分类数据加载测试失败:', error);
+            }
+        }
+        
+        function testBuildCategoryTreeFixed() {
+            const resultDiv = document.getElementById('build-tree-fixed-result');
+            
+            try {
+                console.log('开始测试修复后的buildCategoryTree函数...');
+                
+                // 添加ID到分类数据
+                const categoriesWithIds = defaultCategories.map(cat => ({
+                    ...cat,
+                    id: cat.name
+                }));
+                
+                const tree = buildCategoryTreeFixed(categoriesWithIds);
+                
+                let report = `修复后buildCategoryTree测试结果:\n`;
+                report += `根节点数量: ${tree.length}\n\n`;
+                
+                function renderTreeNode(node, level = 0) {
+                    const indent = '  '.repeat(level);
+                    let result = `${indent}${node.originalCategory?.icon || '📁'} ${node.name}\n`;
+                    
+                    const childKeys = Object.keys(node.children);
+                    if (childKeys.length > 0) {
+                        childKeys.forEach(childKey => {
+                            result += renderTreeNode(node.children[childKey], level + 1);
+                        });
+                    }
+                    
+                    return result;
+                }
+                
+                tree.forEach(rootNode => {
+                    report += renderTreeNode(rootNode);
+                    report += '\n';
+                });
+                
+                // 验证树结构的正确性
+                const level1Count = tree.length;
+                let level2Count = 0;
+                tree.forEach(rootNode => {
+                    level2Count += Object.keys(rootNode.children).length;
+                });
+                
+                report += `验证结果:\n`;
+                report += `- Level 1节点数量: ${level1Count} (期望: 3)\n`;
+                report += `- Level 2节点数量: ${level2Count} (期望: 4)\n`;
+                
+                const isValid = level1Count === 3 && level2Count === 4;
+                report += `- 树结构验证: ${isValid ? '✅ 通过' : '❌ 失败'}\n`;
+                
+                resultDiv.className = isValid ? 'test-result success' : 'test-result warning';
+                resultDiv.textContent = report;
+                
+                console.log('修复后buildCategoryTree测试完成');
+                
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = `修复后buildCategoryTree测试失败: ${error.message}`;
+                console.error('修复后buildCategoryTree测试失败:', error);
+            }
+        }
+        
+        function testCategorySelectionComplete() {
+            const resultDiv = document.getElementById('selection-complete-result');
+            
+            try {
+                console.log('开始完整分类选择功能测试...');
+                
+                // 模拟完整的分类选择流程
+                const categoriesWithIds = defaultCategories.map(cat => ({
+                    ...cat,
+                    id: cat.name,
+                    bookmarkCount: Math.floor(Math.random() * 20)
+                }));
+                
+                const tree = buildCategoryTreeFixed(categoriesWithIds);
+                
+                let report = `完整分类选择功能测试结果:\n\n`;
+                
+                // 测试1: 数据结构完整性
+                report += `1. 数据结构完整性测试:\n`;
+                const hasAllRequiredFields = categoriesWithIds.every(cat => 
+                    cat.name && cat.level && cat.fullPath && cat.color && cat.icon
+                );
+                report += `   - 必需字段检查: ${hasAllRequiredFields ? '✅ 通过' : '❌ 失败'}\n`;
+                
+                // 测试2: 树形结构构建
+                report += `\n2. 树形结构构建测试:\n`;
+                const treeValid = tree.length > 0;
+                report += `   - 树结构构建: ${treeValid ? '✅ 通过' : '❌ 失败'}\n`;
+                report += `   - 根节点数量: ${tree.length}\n`;
+                
+                // 测试3: 父子关系验证
+                report += `\n3. 父子关系验证:\n`;
+                let relationshipValid = true;
+                tree.forEach(rootNode => {
+                    const childCount = Object.keys(rootNode.children).length;
+                    report += `   - ${rootNode.name}: ${childCount}个子分类\n`;
+                    
+                    Object.values(rootNode.children).forEach(child => {
+                        if (child.originalCategory.parentId !== rootNode.originalCategory.name) {
+                            relationshipValid = false;
+                        }
+                    });
+                });
+                report += `   - 父子关系验证: ${relationshipValid ? '✅ 通过' : '❌ 失败'}\n`;
+                
+                // 测试4: 分类选择模拟
+                report += `\n4. 分类选择模拟测试:\n`;
+                const selectableCategories = [];
+                
+                function collectSelectableCategories(node) {
+                    selectableCategories.push(node.fullName);
+                    Object.values(node.children).forEach(child => {
+                        collectSelectableCategories(child);
+                    });
+                }
+                
+                tree.forEach(rootNode => {
+                    collectSelectableCategories(rootNode);
+                });
+                
+                report += `   - 可选择分类数量: ${selectableCategories.length}\n`;
+                report += `   - 分类选择功能: ${selectableCategories.length > 0 ? '✅ 可用' : '❌ 不可用'}\n`;
+                
+                // 总体评估
+                const overallValid = hasAllRequiredFields && treeValid && relationshipValid && selectableCategories.length > 0;
+                report += `\n🎯 总体评估: ${overallValid ? '✅ 分类选择功能修复成功' : '❌ 仍存在问题'}\n`;
+                
+                resultDiv.className = overallValid ? 'test-result success' : 'test-result error';
+                resultDiv.textContent = report;
+                
+                console.log('完整分类选择功能测试完成');
+                
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = `完整分类选择功能测试失败: ${error.message}`;
+                console.error('完整分类选择功能测试失败:', error);
+            }
+        }
+        
+        // 页面加载完成后自动运行基础测试
+        window.addEventListener('load', function() {
+            console.log('页面加载完成，开始自动测试...');
+            setTimeout(() => {
+                testCategoryDataLoading();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

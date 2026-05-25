@@ -1,0 +1,56 @@
+{
+  "manifest_version": 3,
+  "name": "TIGERMARKIII - AI Bookmark Manager",
+  "version": "1.0.0",
+  "description": "AI 书签 Chrome 扩展，支持自动分类、层级标签、截图预览与死链检测",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "bookmarks",
+    "tabs",
+    "scripting",
+    "offscreen",
+    "webNavigation",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://*/*",
+    "https://*/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "TIGERMARKIII",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options/index.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/*", "test-categories.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

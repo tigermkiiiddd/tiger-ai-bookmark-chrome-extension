@@ -1,0 +1,309 @@
+/* Global Styles for TIGERMARKIII */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* 自定义CSS变量 */
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover-color: #4338ca;
+  --secondary-color: #f3f4f6;
+  --text-color: #111827;
+  --text-secondary-color: #6b7280;
+  --border-color: #e5e7eb;
+  --background-color: #ffffff;
+}
+
+.dark {
+  --primary-color: #6366f1;
+  --primary-hover-color: #4f46e5;
+  --secondary-color: #1f2937;
+  --text-color: #f9fafb;
+  --text-secondary-color: #9ca3af;
+  --border-color: #374151;
+  --background-color: #111827;
+}
+
+/* 字体 */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-display: swap;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color);
+}
+
+/* 加载动画优化 */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 文本截断 */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* 按钮交互优化 */
+.btn-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-transition:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 卡片阴影优化 */
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* 自定义组件类 */
+.btn-primary {
+  @apply bg-primary text-white hover:bg-primary-hover focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-text-primary hover:bg-gray-200 dark:hover:bg-gray-600 focus:ring-2 focus:ring-gray-300 transition-all duration-200;
+}
+
+.card {
+  @apply bg-background border border-border rounded-lg shadow-sm;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-border rounded-md bg-background text-text-primary placeholder:text-text-secondary focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200;
+}
+
+.tag-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* 动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* 书签卡片悬停效果 */
+.bookmark-card {
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  @apply hover:shadow-lg hover:-translate-y-1;
+}
+
+/* 标签云效果 */
+.tag-cloud .tag-item:hover {
+  @apply scale-105 shadow-md;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* 加载动画 */
+.spinner {
+  @apply animate-spin;
+}
+
+/* 成功/错误消息 */
+.alert-success {
+  @apply bg-green-50 border border-green-200 text-green-800 rounded-md p-3;
+}
+
+.alert-error {
+  @apply bg-red-50 border border-red-200 text-red-800 rounded-md p-3;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md p-3;
+}
+
+/* 主题切换动画 */
+.theme-transition {
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* 响应式网格 */
+.bookmark-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.bookmark-grid > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 360px;
+}
+
+@media (min-width: 640px) {
+  .bookmark-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .bookmark-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* 选择框样式 */
+.checkbox-custom {
+  @apply appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2;
+}
+
+.checkbox-custom:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+}
+
+/* 下拉菜单动画 */
+.dropdown-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.1s ease-out;
+}
+
+.dropdown-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dropdown-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.075s ease-in;
+}
+
+/* 工具提示 */
+.tooltip {
+  @apply absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg pointer-events-none;
+}
+
+/* Focus可见性 */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* 禁用状态 */
+.disabled {
+  @apply opacity-50 cursor-not-allowed pointer-events-none;
+}
+
+/* 文本截断 */
+.text-truncate {
+  @apply overflow-hidden whitespace-nowrap text-ellipsis;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Material Icons 样式 */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* 骨架屏加载效果 */
+.skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 rounded;
+}
+
+.skeleton-avatar {
+  @apply skeleton w-10 h-10 rounded-full;
+}
+
+.skeleton-card {
+  @apply skeleton h-48 rounded-lg;
+}

@@ -1,0 +1,107 @@
+<html><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --primary-color: #1173d4;
+        --primary-color-text: #ffffff;
+        --secondary-color: #f0f2f4;
+        --secondary-color-text: #111418;
+        --background-color: #ffffff;
+        --text-color: #111418;
+        --muted-text-color: #617589;
+      }
+      .dark {
+        --primary-color: #1173d4;
+        --primary-color-text: #ffffff;
+        --secondary-color: #1c2734;
+        --secondary-color-text: #ffffff;
+        --background-color: #0d1117;
+        --text-color: #ffffff;
+        --muted-text-color: #9098a1;
+      }
+    </style>
+</head>
+<body class="bg-[var(--background-color)] text-[var(--text-color)]" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[var(--secondary-color)] px-10 py-3">
+<div class="flex items-center gap-4 text-[var(--text-color)]">
+<div class="size-6 text-[var(--primary-color)]">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+<path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-[var(--text-color)] text-lg font-bold leading-tight tracking-[-0.015em]">TIGERMARKIII</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-transparent text-[var(--muted-text-color)] hover:bg-[var(--secondary-color)] transition-colors duration-200">
+<span class="material-symbols-outlined">
+                settings
+              </span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCfDK1bp11biMuQ20KJhdmyiKfMUFjerJByqBylAiPx8j-IvhVXemf_fw97x8rai4PoVPndnqR16FhqPZDbHXqK4A_L2XI4Q8oq1-zCduFVZaay9IDevI0sj_iqmyN_oXvZJvgFIYlKp63uKmbGlUy2d5gIctfEnn8FPeHH51WCynB8GC8GoLcedvT2bwIyXiGtl9HBQLOQYxUXbWHu9YiVwJO0mSELBtQ7wDdZN6Zc2TCXkJ_d0ZkpG9g4R23hle7yUwDXaRUpXyc");'></div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-10 px-4 sm:px-6 lg:px-8">
+<div class="w-full max-w-2xl space-y-10">
+<h1 class="text-[var(--text-color)] text-4xl font-bold tracking-tight">Settings</h1>
+<div class="space-y-6">
+<h2 class="text-[var(--text-color)] text-xl font-bold tracking-tight border-b border-[var(--secondary-color)] pb-3">AI Features</h2>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-[var(--text-color)] text-base font-medium">AI Auto-Tagging</p>
+<p class="text-[var(--muted-text-color)] text-sm">Automatically tag your bookmarks using AI.</p>
+</div>
+<label class="relative flex h-8 w-14 cursor-pointer items-center rounded-full bg-[var(--secondary-color)] transition-colors has-[:checked]:bg-[var(--primary-color)]">
+<span class="absolute left-1 h-6 w-6 rounded-full bg-white transition-transform duration-300 ease-in-out peer-checked:translate-x-6" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px, rgba(0, 0, 0, 0.06) 0px 1px 2px;"></span>
+<input checked="" class="peer sr-only" type="checkbox"/>
+</label>
+</div>
+</div>
+<div class="space-y-6">
+<h2 class="text-[var(--text-color)] text-xl font-bold tracking-tight border-b border-[var(--secondary-color)] pb-3">Content Safety</h2>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-[var(--text-color)] text-base font-medium">Content Safety Level</p>
+<p class="text-[var(--muted-text-color)] text-sm">Current setting: Block None</p>
+</div>
+<button class="rounded-md bg-[var(--secondary-color)] px-4 py-2 text-sm font-medium text-[var(--secondary-color-text)] hover:bg-opacity-80 transition-opacity">Change</button>
+</div>
+</div>
+<div class="space-y-6">
+<h2 class="text-[var(--text-color)] text-xl font-bold tracking-tight border-b border-[var(--secondary-color)] pb-3">Tags</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text-color)]">search</span>
+<input class="form-input w-full rounded-md border border-[var(--secondary-color)] bg-[var(--background-color)] py-3 pl-10 pr-4 text-base placeholder:text-[var(--muted-text-color)] focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" placeholder="Search or create tags" value=""/>
+</div>
+</div>
+<div class="space-y-6">
+<h2 class="text-[var(--text-color)] text-xl font-bold tracking-tight border-b border-[var(--secondary-color)] pb-3">Appearance</h2>
+<div class="flex items-center gap-4">
+<label class="flex items-center gap-2 cursor-pointer rounded-md border border-transparent p-2 transition-colors hover:bg-[var(--secondary-color)] has-[:checked]:bg-[var(--secondary-color)] has-[:checked]:border-[var(--primary-color)]">
+<input checked="" class="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]" name="theme" type="radio"/>
+<span class="text-sm font-medium">System</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer rounded-md border border-transparent p-2 transition-colors hover:bg-[var(--secondary-color)] has-[:checked]:bg-[var(--secondary-color)] has-[:checked]:border-[var(--primary-color)]">
+<input class="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]" name="theme" type="radio"/>
+<span class="text-sm font-medium">Light</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer rounded-md border border-transparent p-2 transition-colors hover:bg-[var(--secondary-color)] has-[:checked]:bg-[var(--secondary-color)] has-[:checked]:border-[var(--primary-color)]">
+<input class="form-radio text-[var(--primary-color)] focus:ring-[var(--primary-color)]" name="theme" type="radio"/>
+<span class="text-sm font-medium">Dark</span>
+</label>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

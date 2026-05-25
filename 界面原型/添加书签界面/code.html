@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gemini AI Bookmark Manager</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+    :root {
+      --primary-color: #1173d4;
+      --primary-hover-color: #0e5ca8;
+      --secondary-color: #f0f2f4;
+      --text-primary: #111418;
+      --text-secondary: #617589;
+      --border-color: #dbe0e6;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      width: 400px;
+      height: auto;
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+<div class="flex flex-col">
+<header class="bg-white border-b border-[var(--border-color)]">
+<div class="px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="text-[var(--primary-color)]">
+<svg class="w-7 h-7" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h1 class="text-lg font-bold text-[var(--text-primary)]">Gemini Bookmark</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+<span class="material-symbols-outlined text-xl">
+                        settings
+                    </span>
+</button>
+<div class="size-8 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOcARGEp_BqQzyzjMrAz3Ehe8buazh3900SszJcvoi6NQP32UFomKQh4iJpTGdjQZ2PnY6QDdA8y7h7T0jm4SfGyamdBKZ82EuMdnp05Ay4megvSxACeeaD-LN8txoJ99RckZFfQZWvI1_Y9X7C-3_Gc5kfe15WFysuH23EdmrKDqptJSMNRMqxl61PRXSqXzczossZ-3Yw_PJNNBefVR0-8-zGTH6Y9ApNVpyrllFA2mWkzlbp52lwx-GZgIQBT4RoRoZysz5JYE");'></div>
+</div>
+</div>
+</header>
+<main class="flex-grow px-4 py-5">
+<div class="w-full">
+<div class="text-center mb-5">
+<h2 class="text-xl font-bold text-[var(--text-primary)]">Add a New Bookmark</h2>
+</div>
+<form class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-[var(--text-secondary)] mb-1" for="url">Website URL</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg">
+                            link
+                        </span>
+<input class="form-input w-full pl-9 pr-3 py-2 text-sm rounded-md border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-shadow" id="url" name="url" placeholder="https://example.com" type="url"/>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-[var(--text-secondary)] mb-1" for="tags">Tags</label>
+<div class="flex flex-wrap gap-2">
+<span class="flex items-center gap-1.5 bg-[var(--primary-color)] bg-opacity-10 text-[var(--primary-color)] text-xs font-medium px-2 py-1 rounded-full">
+<span>Technology</span>
+<button class="text-[var(--primary-color)] hover:bg-black hover:bg-opacity-10 rounded-full" type="button"><span class="material-symbols-outlined text-sm">close</span></button>
+</span>
+</div>
+<input class="form-input w-full mt-2 text-sm rounded-md border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-shadow" id="tags" name="tags" placeholder="Add your own tags..." type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-[var(--text-secondary)] mb-1" for="notes">Notes (Optional)</label>
+<textarea class="form-textarea w-full rounded-md border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-shadow text-sm" id="notes" name="notes" placeholder="Add any relevant notes here..." rows="3"></textarea>
+</div>
+<div class="pt-2 flex gap-3">
+<button class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--primary-color)] text-white font-semibold rounded-md shadow-sm hover:bg-[var(--primary-hover-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] transition-all text-sm" type="submit">
+<span class="material-symbols-outlined text-lg">
+                            bookmark_add
+                        </span>
+<span>Add Bookmark</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-[var(--text-primary)] font-medium rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all text-sm" type="button">
+<span class="material-symbols-outlined text-lg">
+                            auto_awesome
+                        </span>
+<span>AI Add Bookmark</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+</div>
+<div class="hidden">
+<header class="bg-white border-b border-[var(--border-color)]">
+<div class="px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="text-[var(--primary-color)]">
+<svg class="w-7 h-7" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h1 class="text-lg font-bold text-[var(--text-primary)]">Gemini Bookmark</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+<span class="material-symbols-outlined text-xl">
+                        close
+                    </span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow px-4 py-5">
+<div class="w-full">
+<div class="text-center mb-5">
+<h2 class="text-xl font-bold text-[var(--text-primary)]">Settings</h2>
+</div>
+<form class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-[var(--text-secondary)] mb-2" for="theme">Theme Color</label>
+<div class="flex items-center gap-3">
+<input class="h-10 w-14 p-1 border border-[var(--border-color)] rounded-md cursor-pointer" id="theme" name="theme" type="color" value="#1173d4"/>
+<input class="form-input w-full text-sm rounded-md border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-shadow" type="text" value="#1173d4"/>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Account</label>
+<div class="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-[var(--border-color)]">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOcARGEp_BqQzyzjMrAz3Ehe8buazh3900SszJcvoi6NQP32UFomKQh4iJpTGdjQZ2PnY6QDdA8y7h7T0jm4SfGyamdBKZ82EuMdnp05Ay4megvSxACeeaD-LN8txoJ99RckZFfQZWvI1_Y9X7C-3_Gc5kfe15WFysuH23EdmrKDqptJSMNRMqxl61PRXSqXzczossZ-3Yw_PJNNBefVR0-8-zGTH6Y9ApNVpyrllFA2mWkzlbp52lwx-GZgIQBT4RoRoZysz5JYE");'></div>
+<div>
+<p class="font-semibold text-sm text-[var(--text-primary)]">John Doe</p>
+<p class="text-xs text-[var(--text-secondary)]">john.doe@example.com</p>
+</div>
+</div>
+<button class="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">Sign Out</button>
+</div>
+</div>
+<div class="pt-4">
+<button class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[var(--primary-color)] text-white font-semibold rounded-md shadow-sm hover:bg-[var(--primary-hover-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] transition-all text-sm" type="submit">
+                        Save Changes
+                    </button>
+</div>
+</form>
+</div>
+</main>
+</div>
+
+</body></html>

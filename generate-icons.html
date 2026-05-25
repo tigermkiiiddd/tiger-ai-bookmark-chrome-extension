@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+    <style>
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .container { text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>TIGERMARKIII Icons Generator</h2>
+        <div id="canvases"></div>
+        <button onclick="downloadAll()">Download All Icons</button>
+    </div>
+
+    <script>
+        const sizes = [16, 32, 48, 128];
+        const canvases = {};
+
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            canvas.id = `icon${size}`;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4f46e5');
+            gradient.addColorStop(1, '#7c3aed');
+            
+            // Draw rounded rectangle background
+            const radius = size * 0.15;
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 0, 0, size, size, radius);
+            ctx.fill();
+            
+            // Draw book outline
+            const bookMargin = size * 0.25;
+            const bookWidth = size * 0.5;
+            const bookHeight = size * 0.56;
+            const bookX = bookMargin;
+            const bookY = bookMargin * 0.9;
+            
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = Math.max(1, size * 0.025);
+            ctx.fillStyle = 'transparent';
+            roundRect(ctx, bookX, bookY, bookWidth, bookHeight, size * 0.06);
+            ctx.stroke();
+            
+            // Draw text lines in book
+            const lineHeight = size * 0.015;
+            const lineMargin = size * 0.08;
+            const lineCount = Math.floor(bookHeight / (lineHeight * 3));
+            
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < Math.min(lineCount, 5); i++) {
+                const y = bookY + lineMargin + i * lineHeight * 2.5;
+                const lineWidth = i === lineCount - 1 ? bookWidth * 0.6 : bookWidth * 0.7;
+                ctx.fillRect(bookX + lineMargin, y, lineWidth, lineHeight);
+            }
+            
+            // Draw tiger mark (circle with stripes)
+            const markSize = size * 0.125;
+            const markX = bookX + bookWidth - markSize;
+            const markY = bookY + markSize * 0.5;
+            
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(markX, markY, markSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw tiger stripes
+            ctx.strokeStyle = '#7c3aed';
+            ctx.lineWidth = Math.max(1, size * 0.015);
+            const stripeLength = markSize * 1.2;
+            for (let i = -1; i <= 1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(markX - stripeLength/2, markY + i * markSize * 0.4);
+                ctx.lineTo(markX + stripeLength/2, markY + i * markSize * 0.4);
+                ctx.stroke();
+            }
+            
+            // Add text if large enough
+            if (size >= 48) {
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.09}px Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('TM III', size/2, size * 0.9);
+            }
+            
+            return canvas;
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            sizes.forEach(size => {
+                if (canvases[size]) {
+                    downloadCanvas(canvases[size], `icon${size}.png`);
+                }
+            });
+        }
+
+        // Create all icons
+        const container = document.getElementById('canvases');
+        sizes.forEach(size => {
+            const canvas = createIcon(size);
+            canvases[size] = canvas;
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'inline-block';
+            wrapper.style.margin = '10px';
+            wrapper.style.textAlign = 'center';
+            
+            const label = document.createElement('div');
+            label.textContent = `${size}x${size}`;
+            label.style.marginBottom = '5px';
+            label.style.fontWeight = 'bold';
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = `Download ${size}x${size}`;
+            downloadBtn.style.display = 'block';
+            downloadBtn.style.marginTop = '5px';
+            downloadBtn.onclick = () => downloadCanvas(canvas, `icon${size}.png`);
+            
+            wrapper.appendChild(label);
+            wrapper.appendChild(canvas);
+            wrapper.appendChild(downloadBtn);
+            container.appendChild(wrapper);
+        });
+    </script>
+</body>
+</html>
