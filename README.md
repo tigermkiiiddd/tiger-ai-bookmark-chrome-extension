@@ -191,3 +191,8 @@ If you plan to contribute code:
 
 - Repo: [tigermkiiiddd/tiger-ai-bookmark-chrome-extension](https://github.com/tigermkiiiddd/tiger-ai-bookmark-chrome-extension)
 - Issues: [GitHub Issues](https://github.com/tigermkiiiddd/tiger-ai-bookmark-chrome-extension/issues)
+
+## License
+
+This project is licensed under the MIT License.
+See the root `LICENSE` file for the full text.

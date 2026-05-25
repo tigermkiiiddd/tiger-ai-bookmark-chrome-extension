@@ -22,6 +22,7 @@ Tiger AI Bookmark Chrome Extension 用来保存、分析和维护书签。
 - 支持死链检测与恢复流程
 - 支持 Chrome 书签导入、导出和同步
 - 支持卡片/列表视图、搜索、筛选和批量操作
+<img width="1097" height="913" alt="image" src="https://github.com/user-attachments/assets/ab0620ed-942c-4458-b725-1baa38231803" />
 
 ## 功能说明
 
@@ -30,6 +31,7 @@ Tiger AI Bookmark Chrome Extension 用来保存、分析和维护书签。
 - 在弹窗里保存当前标签页
 - 保存备注、评分、favicon 和截图预览
 - 保持弹窗关闭足够快，把 AI 任务交给后台处理
+<img width="482" height="602" alt="image" src="https://github.com/user-attachments/assets/30d4d0e4-8227-451f-8f12-cf08bf5024ca" />
 
 ### 2. AI 富化
 
@@ -174,3 +176,8 @@ npm run lint
 
 - Repo: [tigermkiiiddd/tiger-ai-bookmark-chrome-extension](https://github.com/tigermkiiiddd/tiger-ai-bookmark-chrome-extension)
 - Issues: [GitHub Issues](https://github.com/tigermkiiiddd/tiger-ai-bookmark-chrome-extension/issues)
+
+## 许可证
+
+本项目采用 MIT License。
+完整协议内容请查看仓库根目录下的 `LICENSE` 文件。
